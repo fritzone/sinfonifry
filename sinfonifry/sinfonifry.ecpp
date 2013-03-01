@@ -1,0 +1,24 @@
+<%pre>
+// put your includes here
+// #include "foo.h"
+</%pre>
+<%args>
+// define the query parameters
+// bar;
+</%args>
+<%session>
+// define your session scope variables here
+// std::string mySessionState;
+</%session>
+<%cpp>
+// put your C++ code here
+</%cpp>
+<html>
+ <head>
+  <title>ecpp-application sinfonifry</title>
+ </head>
+ <body>
+  <h1>sinfonifry</h1>
+  <p>Hello world!</p>
+ </body>
+</html>

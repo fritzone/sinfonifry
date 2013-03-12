@@ -1,0 +1,9 @@
+<%pre>
+#include <tntdb.h>
+#include <string>
+</%pre>
+<%cpp>
+tntdb::Connection conn = tntdb::connect("postgresql:dbname=sinfonifry user=sinfonifry password=s1nf0n1fry");
+std::string query_for_insert_host = "insert into sinf01_allowed_host(host_ip) values('10.149.1.171')";
+conn.execute(query_for_insert_host);
+</%cpp>

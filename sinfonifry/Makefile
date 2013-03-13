@@ -3,14 +3,18 @@ all: sinfonifry.so
 test: all
 	${TNTNET} tntnet.conf
 
-sinfonifry.so: sinfonifry.o
-	${CXX} -o $@ ${LDFLAGS} $^
+clean:
+	rm *.o
+	rm *.so
+
+sinfonifry.so: sinfonifry.o images.o add_host.o 
+	${CXX} -o $@ -shared $^  -lcxxtools -ltntnet  -ltntdb
 
 .SUFFIXES: .ecpp .gif .jpg .css .js .cpp
 ECPPC=/usr/local/bin/ecppc
 TNTNET=/usr/local/bin/tntnet
 CXXFLAGS+=-I/usr/local/include -fPIC -O2
-LDFLAGS+=-shared -L/usr/local/lib -ltntnet -lcxxtools
+LDFLAGS+=-L/usr/local/lib 
 
 .ecpp.cpp:
 	${ECPPC} ${ECPPFLAGS} ${ECPPFLAGS_CPP} -o $@ $<

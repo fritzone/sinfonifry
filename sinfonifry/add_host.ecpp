@@ -2,8 +2,18 @@
 #include <tntdb.h>
 #include <string>
 </%pre>
+<%args>
+std::string txtAddHost;
+</%args>
 <%cpp>
 tntdb::Connection conn = tntdb::connect("postgresql:dbname=sinfonifry user=sinfonifry password=s1nf0n1fry");
-std::string query_for_insert_host = "insert into sinf01_allowed_host(host_ip) values('10.149.1.171')";
-conn.execute(query_for_insert_host);
+std::string query_for_insert_allowed_host = std::string("insert into sinf01_allowed_hosts(allowed_host_ip) values('") + txtAddHost + std::string("')");
+conn.execute(query_for_insert_allowed_host);
+std::string query_for_insert_init_host = std::string("insert into sinf02_host_init(host_init_ip) values('") + txtAddHost + std::string("')");
+conn.execute(query_for_insert_init_host);
 </%cpp>
+<body>
+<script type="text/javascript">
+    window.location = "/sinfonifry/";
+</script>
+</body>

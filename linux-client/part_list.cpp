@@ -1,106 +1,85 @@
 #include <stdlib.h>
-#include <blkid.h>
+#include <blkid/blkid.h>
 #include <stdio.h>
 #include <sys/ioctl.h>
 #include <ext2fs/ext2fs.h>
 #include <unistd.h>
+#include <sys/vfs.h>
+#include <sys/stat.h>
+#include <string>
+#include <sstream>
+#include <iostream>
+#include <cxxtools/net/tcpstream.h>
+#include <cxxtools/arg.h>
 
-#define OUTPUT_VALUE_ONLY       0x0001
-#define OUTPUT_DEVICE_ONLY      0x0002
-#define OUTPUT_PRETTY_LIST      0x0004
+#include "tinyxml/tinyxml.h"
 
-static void safe_print(const char *cp, int len)
+static const int port = 29888;
+
+static double get_disk_free(const char* path)
 {
-  unsigned char   ch;
+    struct stat stst;
+    struct statfs stfs;
 
-  if (len < 0)
-    len = strlen(cp);
-
-  while (len--) {
-    ch = *cp++;
-    if (ch > 128) {
-      fputs("M-", stdout);
-      ch -= 128;
+    if ( stat(path, &stst) == -1 )
+    {
+        return 0.0;
     }
-    if ((ch < 32) || (ch == 0x7f)) {
-      fputc('^', stdout);
-      ch ^= 0x40; /* ^@, ^A, ^B; ^? for DEL */
+
+    if ( statfs(path, &stfs) == -1 )
+    {
+        return 0.0;
     }
-    fputc(ch, stdout);
-  }
+
+    return stfs.f_bavail * ( stst.st_blksize);
+
 }
 
-static int get_terminal_width()
+static double get_disk_total(const char* path)
 {
-  return 80;
+    struct stat stst;
+    struct statfs stfs;
+
+    if ( stat(path, &stst) == -1 )
+    {
+        return 0.0;
+    }
+
+    if ( statfs(path, &stfs) == -1 )
+    {
+        return 0.0;
+    }
+    return stfs.f_blocks * ( stst.st_blksize);
 }
 
-static int pretty_print_word(const char *str, int max_len,
-                             int left_len, int overflow_nl)
-{
-  int len = strlen(str) + left_len;
-  int ret = 0;
-
-  fputs(str, stdout);
-  if (overflow_nl && len > max_len) {
-    fputc('\n', stdout);
-    len = 0;
-  } else if (len > max_len)
-    ret = len - max_len;
-  do
-    fputc(' ', stdout);
-  while (len++ < max_len);
-  return ret;
-}
 
 static void pretty_print_line(const char *device, const char *fs_type,
                               const char *label, const char *mtpt,
-                              const char *uuid)
+                              const char *uuid, std::stringstream& ss)
 {
-  static int device_len = 10, fs_type_len = 7;
-  static int label_len = 8, mtpt_len = 14;
-  static int term_width = -1;
-  int len, w;
-
-  if (term_width < 0)
-    term_width = get_terminal_width();
-
-  if (term_width > 80) {
-    term_width -= 80;
-    w = term_width / 10;
-    if (w > 8)
-      w = 8;
-    term_width -= 2*w;
-    label_len += w;
-    fs_type_len += w;
-    w = term_width/2;
-    device_len += w;
-    mtpt_len +=w;
-  }
-
-  len = pretty_print_word(device, device_len, 0, 1);
-  len = pretty_print_word(fs_type, fs_type_len, len, 0);
-  len = pretty_print_word(label, label_len, len, 0);
-  len = pretty_print_word(mtpt, mtpt_len, len, 0);
-  fputs(uuid, stdout);
-  fputc('\n', stdout);
+  double total = 0.0;
+  const char* target = mtpt;
+  if(mtpt[0] == '(') return;
+  total = get_disk_total(target);
+  double free_space = get_disk_free(target);
+  ss << "<device name = \"" << device
+     << "\" fs_type = \"" << fs_type
+     << "\" label = \"" << label
+     << "\" mountpt = \"" << mtpt
+     << "\" total_bytes = \"" << total
+     << "\" free_bytes = \"" << free_space << "\" />";
 }
 
-static void pretty_print_dev(blkid_dev dev)
+static void pretty_print_dev(blkid_dev dev, std::stringstream& ss)
 {
   blkid_tag_iterate       iter;
   const char              *type, *value, *devname;
   const char              *uuid = "", *fs_type = "", *label = "";
   int                     len, mount_flags;
-  char                    mtpt[80];
+  char                    mtpt[1024];
   errcode_t               retval;
 
   if (dev == NULL) {
-    pretty_print_line("device", "fs_type", "label",
-		      "mount point", "UUID");
-    for (len=get_terminal_width()-1; len > 0; len--)
-      fputc('-', stdout);
-    fputc('\n', stdout);
     return;
   }
 
@@ -111,7 +90,6 @@ static void pretty_print_dev(blkid_dev dev)
   /* Get the uuid, label, type */
   iter = blkid_tag_iterate_begin(dev);
   while (blkid_tag_next(iter, &type, &value) == 0) {
- printf( "-->%s<--\n", type);
 
     if (!strcmp(type, "UUID"))
       uuid = value;
@@ -129,37 +107,129 @@ static void pretty_print_dev(blkid_dev dev)
   if (retval == 0) {
     if (mount_flags & EXT2_MF_MOUNTED) {
       if (!mtpt[0])
-	strcpy(mtpt, "(mounted, mtpt unknown)");
+	strcpy(mtpt, "(unknown)");
     } else if (mount_flags & EXT2_MF_BUSY)
       strcpy(mtpt, "(in use)");
     else
       strcpy(mtpt, "(not mounted)");
   }
 
-  pretty_print_line(devname, fs_type, label, mtpt, uuid);
+  pretty_print_line(devname, fs_type, label, mtpt, uuid, ss);
 }
 
-int main()
+std::string gather_disk_stat()
 {
-  blkid_dev_iterate       iter;
-  blkid_dev               dev;
-  blkid_cache             cache = NULL;
-  char *search_type = NULL, *search_value = NULL;
-  char *read = NULL;
+    blkid_dev_iterate       iter;
+    blkid_dev               dev;
+    blkid_cache             cache = NULL;
+    char *search_type = NULL, *search_value = NULL;
+    char *read = NULL;
 
-  blkid_get_cache(&cache, read);
+    blkid_get_cache(&cache, read);
 
-  blkid_probe_all(cache);
+    blkid_probe_all(cache);
 
-  iter = blkid_dev_iterate_begin(cache);
-  blkid_dev_set_search(iter, search_type, search_value);
-  while (blkid_dev_next(iter, &dev) == 0) 
-  {
-    dev = blkid_verify(cache, dev);
-    if (!dev)
-      continue;
-    pretty_print_dev(dev);
-  }
-  blkid_dev_iterate_end(iter);
+    std::stringstream ss;
+    ss.precision(100); // weird, but seems to work
 
+    ss << "<?xml version=\"1.0\" encoding=\"UTF-8\"?><devices>";
+
+    iter = blkid_dev_iterate_begin(cache);
+    blkid_dev_set_search(iter, search_type, search_value);
+    while (blkid_dev_next(iter, &dev) == 0)
+    {
+      dev = blkid_verify(cache, dev);
+      if (!dev)
+        continue;
+      pretty_print_dev(dev, ss);
+    }
+    blkid_dev_iterate_end(iter);
+    ss << "</devices>";
+    std::string s = ss.str();
+    return s;
+}
+
+int main(int argc, char* argv[])
+{
+    TiXmlDocument doc;
+    doc.LoadFile("/etc/sinfonifry/client-config.xml");
+    if(doc.Error())
+    {
+        std::cerr << "Cannot create XML document from config file or config file is not there." << std::endl;
+        return 1;
+    }
+
+    std::string core_host = "127.0.0.1";
+    int port = 29888;
+
+    TiXmlElement* el = doc.FirstChildElement("sinfonifry");
+    if(el)
+    {
+        el = el->FirstChildElement("client");
+        if(!el)
+        {
+            std::cerr << "Wrong xml file. No <client> node in <sinfonifry> node" << std::endl;
+            return 1;
+        }
+        el = el->FirstChildElement("config");
+        if(!el)
+        {
+            std::cerr << "Wrong xml file. No <config> node in <client> node" << std::endl;
+            return 1;
+        }
+        // get the core host IP
+        const char* att_core_host = el->Attribute("core-host");
+        if(!att_core_host)
+        {
+            std::cerr << "Wrong xml file. No core-host attribute in <config> node" << std::endl;
+            return 1;
+        }
+        core_host = att_core_host;
+
+        // get the core host port
+        const char* att_core_port = el->Attribute("core-port");
+        if(!att_core_port)
+        {
+            std::cerr << "Wrong xml file. No core-port attribute in <config> node, using default 29888" << std::endl;
+        }
+        else
+        {
+            port = atoi(att_core_port);
+            if(port == 0)
+            {
+                std::cerr << "Wrong xml file. core-port attribute in <config> node is wrong, using default 29888" << std::endl;
+                port = 29888;
+            }
+        }
+
+    }
+    else
+    {
+        std::cerr << "Wrong xml file. No <sinfonifry> node" << std::endl;
+        return 1;
+    }
+    int exception_counter = 1;
+    while(1)
+    {
+        std::string s = gather_disk_stat();
+
+        try
+        {
+
+        cxxtools::Arg<const char*> ip(argc, argv, 'i', core_host.c_str());
+
+        cxxtools::net::iostream conn(ip.getValue(), port);
+        conn.write(s.c_str(), s.length());
+        conn.flush();
+        conn.close();
+        exception_counter = 1;
+        }
+        catch(const std::exception& ex)
+        {
+            std::cout << ex.what() << std::endl;
+            exception_counter ++;
+        }
+        std::cout << "sleeping: " << exception_counter << std::endl;
+        sleep(exception_counter);
+    }
 }

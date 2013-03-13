@@ -2,10 +2,10 @@
 #include <fstream> // include the class-definition here
 </%pre>
 <%cpp>
-  std::string path = request.getQueryString();
-  std::cout << path << std::endl;
-  
-  std::ifstream fin("test.png", std::ios::in | std::ios::binary);
+  std::string path = request.getPathInfo();
+  std::string image = path + ".png";
+  image = "./img/" + image;
+  std::ifstream fin(image.c_str(), std::ios::in | std::ios::binary);
   std::ostringstream oss;
   oss << fin.rdbuf();
   std::string imageData(oss.str());

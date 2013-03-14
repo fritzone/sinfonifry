@@ -6,7 +6,8 @@ bool is_dot(char c)
 }
 </%pre>
 <%args>
-std::string txtAddHost;
+std::string txtAddHostName;
+std::string txtAddHostIp;
 </%args>
 <%session>
 </%session>
@@ -57,17 +58,72 @@ td.hidden {
 table.hidden {
   display:none
 }
-
+input.textfield {
+  border-width: 1px;
+  border-style: solid;
+  border-color: #999999;
+  background-repeat: repeat-x;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  color: #333333;
+  width: 200px;
+  height: 22px;
+}
+button {
+  border-width: 1px;
+  border-style: solid;
+  border-color: #999999;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  color: #333333;
+  width: 75px;
+  height: 21px;
+}
 </style>
 
 <head>
    <title>sinfonifry</title>
 
    <script type="text/javascript">
-     function showHide(el){
-       id = document.getElementById(el).style;
-       id.display = (id.display != 'block')? 'block' : 'none';
-     }
+
+    function showHide(el)
+    {
+      id = document.getElementById(el).style;
+      id.display = (id.display != 'block')? 'block' : 'none';
+    }
+
+    function sendHostToServer()
+    {
+      var xmlhttp;
+      if(window.XMLHttpRequest)
+      {
+         xmlhttp=new XMLHttpRequest();
+      }
+      else
+      {
+        xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+      }
+      xmlhttp.onreadystatechange=function()
+      {
+        if (xmlhttp.readyState==4 && xmlhttp.status==200)
+        {
+          document.getElementById("divForHostAddStatus").innerHTML=xmlhttp.responseText;
+        }
+      }
+      s="/add_host?txtAddHostIp=";
+      s+=document.getElementById("txtAddHostIp").value;
+      s+="&txtAddHostName=";
+      s+=document.getElementById("txtAddHostName").value;
+      xmlhttp.open("GET", s, true);
+      xmlhttp.send();
+    }
+
+    function hideAddHostBox()
+    {
+      showHide('tdAddHost');
+      document.getElementById("divForHostAddStatus").innerHTML="";
+    }
+
    </script>
 </head>
 
@@ -76,19 +132,28 @@ table.hidden {
    <# the menu system should go to the top #>
    <table class="sinfonifry">
    <tr>
-      <td><img src="/server_plus.png"></td>
-      <td valign="middle">
+      <td valign="top"><img src="/server_plus.png"></td>
+      <td valign="top">
          <p class="sinfonifry"><a href="javascript:showHide('tdAddHost')">Add Host</a></p>
       </td>
       <td valign="middle" class="hidden" id="tdAddHost">
-       <form action="/add_host" method="post">
-         <p class="sinfonifry>
-         <div id="divAddHost" class="hidden">
-           <input type="text" name="txtAddHost" />
-           <input type="submit" value="Submit" />
-         </div>
-         </p>
+       <table>
+       <tr>
+       <td>
+       <form action="">
+           <table>
+           <tr><td> <input placeholder="IP" type="text" name="txtAddHostIp" id="txtAddHostIp" class="textfield"/> </td></tr>
+           <tr><td> <input placeholder="Name" type="text" name="txtAddHostName" id="txtAddHostName" class="textfield"/> </td></tr>
+           <tr><td> <button type="button" onclick="sendHostToServer()">Send</button> </td></tr>
+           <tr><td> <div id="divForHostAddStatus"></div> </td></tr>
+           </table>
        </form>
+       </td>
+       <td valign ="top">
+        <img src="/close.png" width="16" height="16" onclick="hideAddHostBox()">
+       </td>
+       </tr>
+       </table>
       </td>
    </tr>
    </table>

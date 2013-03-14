@@ -11,6 +11,7 @@
 #include <iostream>
 #include <cxxtools/net/tcpstream.h>
 #include <cxxtools/arg.h>
+#include <ctime>
 
 #include "tinyxml/tinyxml.h"
 
@@ -132,8 +133,9 @@ std::string gather_disk_stat()
     std::stringstream ss;
     ss.precision(100); // weird, but seems to work
 
-    ss << "<?xml version=\"1.0\" encoding=\"UTF-8\"?><devices>";
-
+    ss << "<?xml version=\"1.0\" encoding=\"UTF-8\"?><devices timestamp=\"";
+    std::time_t t = std::time(0);
+    ss << t << "\">";
     iter = blkid_dev_iterate_begin(cache);
     blkid_dev_set_search(iter, search_type, search_value);
     while (blkid_dev_next(iter, &dev) == 0)

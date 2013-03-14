@@ -3,17 +3,27 @@
 #include <string>
 </%pre>
 <%args>
-std::string txtAddHost;
+std::string txtAddHostName;
+std::string txtAddHostIp;
 </%args>
 <%cpp>
+try
+{
 tntdb::Connection conn = tntdb::connect("postgresql:dbname=sinfonifry user=sinfonifry password=s1nf0n1fry");
-std::string query_for_insert_allowed_host = std::string("insert into sinf01_allowed_hosts(allowed_host_ip) values('") + txtAddHost + std::string("')");
+std::string query_for_insert_allowed_host = std::string("insert into sinf01_allowed_hosts(allowed_host_ip, allowed_host_name) values('") + txtAddHostIp + std::string("', '" + txtAddHostName + "')");
 conn.execute(query_for_insert_allowed_host);
-std::string query_for_insert_init_host = std::string("insert into sinf02_host_init(host_init_ip) values('") + txtAddHost + std::string("')");
+std::string query_for_insert_init_host = std::string("insert into sinf02_host_init(host_init_ip) values('") + txtAddHostIp + std::string("')");
 conn.execute(query_for_insert_init_host);
+reply.out() << "<p class=\"sinfonifry\"><img src=\"/ok.png\" width=\"16\" height=\"16\"><span>Host" << txtAddHostIp << " added</span></p>";
+}
+catch(const std::exception& ex)
+{
+ 
+ std::string s = ex.what();
+ unsigned found23505 = s.find("23505");
+ if(found23505 != std::string::npos)
+ {
+   reply.out() << "<p class=\"sinfonifry\"><img src=\"/error.png\" width=\"16\" height=\"16\"><span>Host" << txtAddHostIp << " is already added</span></p>";
+ }
+}
 </%cpp>
-<body>
-<script type="text/javascript">
-    window.location = "/sinfonifry/";
-</script>
-</body>

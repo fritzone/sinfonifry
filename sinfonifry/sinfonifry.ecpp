@@ -1,5 +1,4 @@
 <%pre>
-#include <tntdb.h>
 bool is_dot(char c)
 {
   return c == '.';
@@ -49,6 +48,34 @@ p.sinfonifry {
   text-align: center;
   text-indent: 0ex;
 }
+p.table_header {
+  font-family: sans-serif;
+  font-style: normal;
+  font-variant: normal;
+  font-weight: bold;
+  font-size: medium;
+  line-height: 100%;
+  word-spacing: normal;
+  letter-spacing: normal;
+  text-decoration: none;
+  text-transform: none;
+  text-align: left;
+  text-indent: 0ex;
+}
+p.table_text {
+  font-family: sans-serif;
+  font-style: normal;
+  font-variant: normal;
+  font-weight: normal;
+  font-size: medium;
+  line-height: 100%;
+  word-spacing: normal;
+  letter-spacing: normal;
+  text-decoration: none;
+  text-transform: none;
+  text-align: left;
+  text-indent: 0ex;
+}
 div.hidden {
   display:none
 }
@@ -83,13 +110,27 @@ button {
 
 <head>
    <title>sinfonifry</title>
-
+   <script src="jquery.js"></script>
    <script type="text/javascript">
 
+    // generic timer to refresh the page every 1 minute
+    var timer=setInterval(function(){getDataFromServer()},10000);
+    // one shot time to load the stuff on page load
+    var oneShotTimer=setTimeout(function(){getDataFromServer()},10);
+    
     function showHide(el)
     {
       id = document.getElementById(el).style;
       id.display = (id.display != 'block')? 'block' : 'none';
+      if(id.display != 'none' && el.id != 'tdAddHost')
+      {
+         window.clearInterval(timer);
+      }
+      else
+      {
+         timer=setInterval(function(){getDataFromServer()},10000);
+      }
+      
     }
 
     function sendHostToServer()
@@ -124,10 +165,33 @@ button {
       document.getElementById("divForHostAddStatus").innerHTML="";
     }
 
-   </script>
+    function getDataFromServer()
+    {
+      var xmlhttp;
+      if(window.XMLHttpRequest)
+      {
+         xmlhttp=new XMLHttpRequest();
+      }
+      else
+      {
+        xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+      }
+      xmlhttp.onreadystatechange=function()
+      {
+        if (xmlhttp.readyState==4 && xmlhttp.status==200)
+        {
+          document.getElementById("divForData").innerHTML=xmlhttp.responseText;
+        }
+      }
+      xmlhttp.open("GET", "/get_data", true);
+      xmlhttp.send();
+
+    }
+
+    </script>
 </head>
 
-<body>
+<body onload="getDatafromServer()">
 
    <# the menu system should go to the top #>
    <table class="sinfonifry">
@@ -160,60 +224,7 @@ button {
 
    <hr>
 
-   <# the list of hosts below the menu #>
-   <table class="sinfonifry">
-   <# print a table line for each of the hosts in thd DB #>
-   <%cpp>
-   tntdb::Connection conn = tntdb::connect("postgresql:dbname=sinfonifry user=sinfonifry password=s1nf0n1fry");
-   std::string query_for_hosts = "select host_ip from sinf01_host";
-   tntdb::Result result = conn.select(query_for_hosts);
-   for (tntdb::Result::const_iterator it = result.begin(); it != result.end(); ++it)
-   {
-        tntdb::Row row = *it;
-        std::string a("");
-        row[0].get(a);  // read column 0 into variable a
-        // remove the "." from the text
-        std::string b = a;
-        b.erase(remove_if(b.begin(), b.end(), is_dot), b.end());
-        reply.out() << "<tr>"; // the row for the current hosts data
-        reply.out() << "<td valign=\"top\">"; // the cell for the host name, with the clickable context
-        reply.out() << "<p class=\"sinfonifry\">" 
-                       << "<a href=\"javascript:showHide('tdDataFor" << b << "')\">"
-                       << a
-                       <<"</a></p>"; // the actual IP of the hosts, clicking it will toggle the next field
-        reply.out() << "</td>";  // closing the current cell
-        reply.out() << "<td class=\"hidden\" id=\"tdDataFor" << b << "\">";                          // the cell which will contain the data tables AND the menu
-        // now in the comming td generate another table: first line is a header, working as a tab control showing: disk cpu
-        // next lines are specific data for the thing
-        reply.out() << "<table class =\"sinfonifry\">";          // the table
-        reply.out() << " <tr>"; // the row for the "Tabbed" menu
-        reply.out() << "  <td>"; // the cell for "Disk"
-        reply.out() << "<p class=\"sinfonifry\">"
-                    << "<a href=\"javascript:showHide('tableDiskDataFor" << b << "')\">"
-                    << "Disk</a></p>";
-        reply.out() << "  </td>"; // closing the cell for disk... later create more cells for cpu, etc
-        reply.out() << " </tr>";  // closing the row for the menu
-        reply.out() << " <tr>";   // A new row for the actual data tables
-        reply.out() << "  <td>";  // the cell for the table with id tableDiskDataForXXXX
-        // the table  tableDiskDataForXXXX itself
-        reply.out() << "    <table class=\"hidden\" id=\"tableDiskDataFor" << b << "\">";
-        // and here generate the disk data for the current host based on data from the DB
-        reply.out() << "     <tr>";
-        reply.out() << "      <td>";
-        reply.out() << " ABC ";
-        reply.out() << "      </td>";
-        reply.out() << "     </tr>";
-        reply.out() << "    </table>";
-        reply.out() << "  </td>"; // closing the cell for tableDiskDataForXXXX
-        reply.out() << " </tr>";  // closing the row for the data tables
-        reply.out() << "</table>";// closing the table with the menu and the data tables
-
-        reply.out() << "</td>";   // closing the second cell from the main table containing the host data
-        reply.out() << "</tr>";   // closing the row for the host
-   }
-   </%cpp>
-
-   </table>
-
+ <# here load the HTML get_data component #>
+  <div id="divForData"></div>
 </body>
 </html>

@@ -1,0 +1,165 @@
+<%pre>
+#include <tntdb.h>
+</%pre>
+
+   <# the list of hosts below the menu #>
+   <table class="sinfonifry">
+   <# print a table line for each of the hosts in thd DB #>
+   <%cpp>
+   tntdb::Connection conn = tntdb::connect("postgresql:dbname=sinfonifry user=sinfonifry password=s1nf0n1fry");
+   std::string query_for_hosts = "select host_name, host_ip, host_id from sinf01_host";
+   tntdb::Result result = conn.select(query_for_hosts);
+   for (tntdb::Result::const_iterator it = result.begin(); it != result.end(); ++it)
+   {
+        tntdb::Row row = *it;
+        std::string hostName("");
+        std::string hostIp("");
+        uint64_t hostId;
+        // }
+        row[0].get(hostName);  // read the host name
+        row[1].get(hostIp);    // read the host IP
+        row[2].get(hostId);    // the host ID
+        // remove the "." from the text
+        std::string b = hostIp;
+        std::replace(b.begin(), b.end(), '.', '_');
+        reply.out() << "<tr>"; // the row for the current hosts data
+        reply.out() << "<td valign=\"top\">"; // the cell for the host name, with the clickable context
+        reply.out() << "<p class=\"sinfonifry\" align=\"center\">" 
+                       << "<a href=\"javascript:showHide('tdDataFor" << b << "')\">"
+                       << hostName << "</a><br><span><font size=\"1\">("<< hostIp << ") </span>"
+                       <<"</p>"; // the actual IP of the hosts, clicking it will toggle the next field
+        reply.out() << "</td>";  // closing the current cell
+        reply.out() << "<td class=\"hidden\" id=\"tdDataFor" << b << "\">";                          // the cell which will contain the data tables AND the menu
+        // now in the comming td generate another table: first line is a header, working as a tab control showing: disk cpu
+        // next lines are specific data for the thing
+        reply.out() << "<table class =\"sinfonifry\">";          // the table
+        reply.out() << " <tr>"; // the row for the "Tabbed" menu
+        reply.out() << "  <td>"; // the cell for "Disk"
+        reply.out() << "<p class=\"sinfonifry\">"
+                    << "<a href=\"javascript:showHide('tableDiskDataFor" << b << "')\">"
+                    << "Disk</a></p>";
+        reply.out() << "  </td>"; // closing the cell for disk... later create more cells for cpu, etc
+        reply.out() << " </tr>";  // closing the row for the menu
+        reply.out() << " <tr>";   // A new row for the actual data tables
+        reply.out() << "  <td>";  // the cell for the table with id tableDiskDataForXXXX
+        // the table  tableDiskDataForXXXX itself
+        // firstly: fetch the latest disk statistics
+        std::stringstream ss;
+        ss << "select distinct b.disk_mountpoint, b.disk_id, a.disk_stat_free_space, a.disk_stat_measurement_time, b.disk_total_space, b.disk_physical_id " 
+           << "from sinf01_disk b, sinf01_disk_statistics a " 
+           << "where b.host_id = " << hostId << " and a.disk_stat_disk_id =b.disk_id and " 
+           << "a.disk_stat_measurement_time = (select max(disk_stat_measurement_time) from sinf01_disk_statistics) "
+           << "group by b.disk_mountpoint, b.disk_id, a.disk_stat_free_space, a.disk_stat_measurement_time "
+           << "order by a.disk_stat_measurement_time desc";
+        tntdb::Result diskDataResult = conn.select(ss.str());   
+        reply.out() << "    <table class=\"hidden\" id=\"tableDiskDataFor" << b << "\">";
+        // the header of the table
+        reply.out() << "     <tr>";
+          reply.out() << "      <th>";
+          reply.out() << "<p class=\"table_header\">Mountpoint</p>";
+          reply.out() << "      </th>";
+          reply.out() << "      <th>";
+          reply.out() << "<p class=\"table_header\">Free Space</p>";
+          reply.out() << "      </th>";
+          reply.out() << "      <th>";
+          reply.out() << "<p class=\"table_header\">Total Space</p>";
+          reply.out() << "      </th>";
+          reply.out() << "      <th>";
+          reply.out() << "<p class=\"table_header\"><b>%Free</b></p>";
+          reply.out() << "      </th>";
+          reply.out() << "      <th>";
+          reply.out() << "<p class=\"table_header\"><b>Status</b></p>";
+          reply.out() << "      </th>";
+          reply.out() << "     </tr>";
+        // and here generate the disk data for the current host based on data from the DB
+        int smallestPercentage = 100;
+        for (tntdb::Result::const_iterator it2 = diskDataResult.begin(); it2 != diskDataResult.end(); ++it2)
+        { // }
+          tntdb::Row row = *it2; 
+          std::string mountpt;
+          uint64_t freeSpace;
+          uint64_t totalSpace;
+          std::string physId;
+          row[0].get(mountpt);
+          row[2].get(freeSpace);
+          row[4].get(totalSpace);
+          row[5].get(physId);
+          if(totalSpace > 0) // do not go in there if there is no space on the device (swap for example)
+          { // }
+            if(smallestPercentage > 100 * freeSpace / totalSpace)
+            { // }
+               smallestPercentage = 100 * freeSpace / totalSpace;
+            }
+
+            reply.out() << "     <tr>";
+            // the mountpoint  
+            reply.out() << "      <td>";
+              reply.out() << "<p class=\"table_text\" title=\"" << physId << "\">"     ;
+            reply.sout() << mountpt;
+            reply.out() <<"</p>";
+            reply.out() << "      </td>";
+            // the free space  
+            reply.out() << "      <td>";
+            if(freeSpace < 1073741824) // under 1 GB we show MB
+              reply.out() << "<p class=\"table_text\">" << freeSpace  / 1048576<< "<b>M</b>b</p>"; 
+            else
+              reply.out() << "<p class=\"table_text\" title=\"" <<freeSpace << " bytes\">" << freeSpace  / 1073741824<< "<b>G</b>b</p>";
+            reply.out() << "      </td>";
+            // the total space  
+            reply.out() << "      <td>";
+            if(totalSpace < 1073741824)
+              reply.out() << "<p class=\"table_text\">" << totalSpace / 1048576 << "Mb</p>";
+            else
+              reply.out() << "<p class=\"table_text\">" << totalSpace / 1073741824 << "Gb</p>";
+            reply.out() << "      </td>";
+            reply.out() << "      <td>";
+            reply.out() << "<p class=\"table_text\">";
+            reply.sout() << 100 * freeSpace / totalSpace;
+            reply.out() <<"</p>";
+            reply.out() << "      </td>";
+              {
+                
+              std::string iconToUse = "ok.png";
+                                                              // }
+              if(100 * freeSpace / totalSpace < 5)
+              { // }
+                iconToUse = "error.png";   
+              }
+              else
+              if(100 * freeSpace / totalSpace < 15)
+              {// }
+                iconToUse = "warning.png";
+              }
+              reply.out() << "      <td align=\"center\">";
+              reply.out() << "       <img src=\"" << iconToUse <<"\" width=\"22\" height=\"22\"/>";
+              reply.out() << "      </td>";
+
+              }
+            
+            reply.out() << "     </tr>\n";
+          }
+        }
+        reply.out() << "    </table>"; // the disk data table closure
+        reply.out() << "  </td>"; // closing the cell for tableDiskDataForXXXX
+        reply.out() << " </tr>";  // closing the row for the data tables
+        reply.out() << "</table>";// closing the table with the menu and the data tables
+
+        reply.out() << "</td>";   // closing the second cell from the main table containing the host data
+        reply.out() << "<td valign=\"top\">";    // shows either an Ok sign or a warning sign
+        
+        std::string iconToUse = "ok.png";
+        if(smallestPercentage < 1)
+        {
+          iconToUse = "error.png";   
+        }
+        else
+        if(smallestPercentage < 5)
+        {
+           iconToUse = "warning.png";
+        }
+        reply.out() << "<img src=\"" << iconToUse <<"\" width=\"22\" height=\"22\" onclick=\"showHide('tdDataFor" << b << "')\"/>";
+        reply.out() << "</td>";
+        reply.out() << "</tr>";   // closing the row for the host
+   }
+   </%cpp>
+   </table>

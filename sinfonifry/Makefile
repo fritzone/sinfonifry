@@ -7,7 +7,7 @@ clean:
 	rm *.o
 	rm *.so
 
-sinfonifry.so: sinfonifry.o images.o add_host.o 
+sinfonifry.so: sinfonifry.o images.o add_host.o get_data.o
 	${CXX} -o $@ -shared $^  -lcxxtools -ltntnet  -ltntdb
 
 .SUFFIXES: .ecpp .gif .jpg .css .js .cpp

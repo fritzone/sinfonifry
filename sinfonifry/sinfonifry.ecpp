@@ -112,29 +112,36 @@ button {
    <title>sinfonifry</title>
    <script src="jquery.js"></script>
    <script type="text/javascript">
+    
+    var shownElements=new Array();
 
-    // generic timer to refresh the page every 1 minute
+    // generic timer to refresh the page every 10 seconds (10000)
     var timer=setInterval(function(){getDataFromServer()},10000);
     // one shot time to load the stuff on page load
     var oneShotTimer=setTimeout(function(){getDataFromServer()},10);
     
     function showHide(el)
-    {
+    { // }
       id = document.getElementById(el).style;
       id.display = (id.display != 'block')? 'block' : 'none';
       if(id.display != 'none' && el.id != 'tdAddHost')
-      {
-         window.clearInterval(timer);
+      { // somethig was shown. Add to the shown array }
+         shownElements.unshift(el);
       }
       else
-      {
-         timer=setInterval(function(){getDataFromServer()},10000);
+      { // something was hidden. Remove it from the shownElements array }
+         shownElements.splice(shownElements.indexOf(el));
       }
-      
+    }
+    
+    function forceShow(el)
+    { // }
+      id = document.getElementById(el).style;
+      id.display = 'block';
     }
 
     function sendHostToServer()
-    {
+    { // }
       var xmlhttp;
       if(window.XMLHttpRequest)
       {
@@ -164,7 +171,7 @@ button {
       showHide('tdAddHost');
       document.getElementById("divForHostAddStatus").innerHTML="";
     }
-
+    
     function getDataFromServer()
     {
       var xmlhttp;
@@ -179,8 +186,13 @@ button {
       xmlhttp.onreadystatechange=function()
       {
         if (xmlhttp.readyState==4 && xmlhttp.status==200)
-        {
+        { // }
           document.getElementById("divForData").innerHTML=xmlhttp.responseText;
+          // and now show all the elements in the shownElements array
+          for(var i=0; i<shownElements.length; i++)
+          {
+            forceShow(shownElements[i]);
+          }
         }
       }
       xmlhttp.open("GET", "/get_data", true);

@@ -24,7 +24,7 @@ protected:
     std::ostringstream ss;
     ss << m_worker->rdbuf();
     std::string s =ss.str();
-    std::cout << s << std::endl;
+    //std::cout << s << std::endl;
     std::string c =m_worker->getPeerAddr();
 
     bool host_need_initialization = true;
@@ -107,13 +107,11 @@ protected:
         }
 
         // update the host last seen time?
+        if(update_host_last_seen_time)
         {
-            if(update_host_last_seen_time)
-            {
-                std::stringstream ss;
-                ss << "update sinf01_host set host_last_seen_time=now() where host_id = " << host_id;
-                conn.execute(ss.str());
-            }
+            std::stringstream ss;
+            ss << "update sinf01_host set host_last_seen_time=now() where host_id = " << host_id;
+            conn.execute(ss.str());
         }
 
         TiXmlDocument doc;
@@ -190,13 +188,16 @@ protected:
                     }
                 }
 
-                // second run: to actually insert the data in the statistic table
+                // second run: to actually insert the data in the statistic table and do the calculations based on the data we get
+                int smallestPercentage = 100;
+                int host_status = 0;
+                std::string host_status_explanation("All OK");
                 el_for_device = el_for_devices->FirstChildElement("device");
                 while(el_for_device)
                 {
-
                     std::string disk_part_name;
                     uint64_t free_disk_space = 0;
+                    uint64_t total_disk_space = 0;
 
                     const char* attr = el_for_device->Attribute("name");
                     if(attr) { disk_part_name = attr; }
@@ -204,13 +205,16 @@ protected:
                     attr = el_for_device->Attribute("free_bytes");
                     if(attr) { free_disk_space = atoll(attr); }
 
+                    attr = el_for_device->Attribute("total_bytes");
+                    if(attr) { total_disk_space = atoll(attr); }
+
                     // find the disk ID from sinf01_disk table:
                     int found_disk_id = 0;
                     {
                     std::stringstream ss;
                     ss << "select disk_id from sinf01_disk where host_id=" << host_id <<" and disk_physical_id='"<< disk_part_name <<"'";
                     std::string s= ss.str();
-                    std::cout << s << std::endl;
+                    //std::cout << s << std::endl;
                     tntdb::Result result = conn.select(s);
                     tntdb::Row row = *result.begin();
                     row[0].get(found_disk_id);  // read column 0 into variable a
@@ -222,21 +226,61 @@ protected:
                     }
                     // and here finally insert the data into the statistics table
                     prepared_insertion.set("v1", found_disk_id).set("v2", free_disk_space).execute();
+                    if(total_disk_space > 0)
+                    {
+                        // do some statistics calculation
+                        if(smallestPercentage > 100 * free_disk_space / total_disk_space)
+                        {
+                            smallestPercentage = 100 * free_disk_space / total_disk_space;
+                        }
+                    }
 
+                    if(smallestPercentage < 15 && host_status == 0)
+                    {
+                        // flip the host status only if the remaining space is > 1GB because <1GB as 15 percent can be only on a pretty small hard disk and does not matter
+                        if(free_disk_space > 1073741824)
+                        {
+                            host_status = 1;
+                            std::stringstream ss;
+                            ss << "Warning: " << disk_part_name << " has only " << free_disk_space/1073741824 << "GB free, out of " << total_disk_space/1073741824 << "GB representing " << smallestPercentage <<"%";
+                            host_status_explanation = ss.str();
+                        }
+                    }
+
+                    if(smallestPercentage < 5  && host_status == 0)
+                    {
+                        // flip the host status only if the remaining space is > 1GB
+                        if(free_disk_space > 1073741824)
+                        {
+                            host_status = 2;
+                            std::stringstream ss;
+                            ss << "Critical: " << disk_part_name << " has only " << free_disk_space/1073741824 << "GB free, out of " << total_disk_space/1073741824<< "GB representing " << smallestPercentage <<"%";
+                            host_status_explanation = ss.str();
+                        }
+                    }
 
                     el_for_device = el_for_device->NextSiblingElement("device");
                 }
-            }
+
+                // and update the "host" table with the last status
+                std::stringstream ss;
+                ss << "update sinf01_host set host_last_status=" << host_status << ", host_last_status_text='" << host_status_explanation << "' where host_id = " << host_id;
+                conn.execute(ss.str());
+
+            } // devices node was found
             else
             {
                 std::cout << "no root" << std::endl;
             }
+
+            conn.close();
         }
     }
     catch (const std::exception& e)
     {
         std::cerr << e.what() << std::endl;
     }
+    m_worker->close();
   }
 
 private:

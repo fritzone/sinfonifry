@@ -1,0 +1,10 @@
+<%pre>
+#include <tntdb.h>
+#include <string>
+</%pre>
+<%args>
+std::string hostId;
+</%args>
+<%cpp>
+  std::cout << hostId << std::endl;
+</%cpp>

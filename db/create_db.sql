@@ -56,6 +56,8 @@ CREATE TABLE sinf01_host
   host_ip inet NOT NULL,                         -- The IP of the host
   host_name character varying(255),              -- The name of the host
   host_last_seen_time timestamp,                 -- When we "saw" this host for the last time. The now() function of postgres
+  host_last_status int,                          -- The status of the host: 0 - OK, 1 - Warning, 2 - Error, 3 - Host Down for more than 10 minutes. Implemented in core, used in WEB
+  host_last_status_text character varying(255),  -- The explanation of the status of the host
   CONSTRAINT "PK_host" PRIMARY KEY (host_id )
 )
 WITH (

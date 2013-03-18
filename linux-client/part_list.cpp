@@ -1,3 +1,5 @@
+#define __STDC_FORMAT_MACROS
+
 #include <stdlib.h>
 #include <blkid/blkid.h>
 #include <stdio.h>
@@ -5,70 +7,67 @@
 #include <ext2fs/ext2fs.h>
 #include <unistd.h>
 #include <sys/vfs.h>
-#include <sys/stat.h>
+#include <sys/statvfs.h>
 #include <string>
 #include <sstream>
 #include <iostream>
 #include <cxxtools/net/tcpstream.h>
 #include <cxxtools/arg.h>
 #include <ctime>
+#include <inttypes.h>
 
 #include "tinyxml/tinyxml.h"
 
 static const int port = 29888;
 
-static double get_disk_free(const char* path)
+static uint64_t get_disk_free(const char* path)
 {
-    struct stat stst;
-    struct statfs stfs;
+    struct statvfs stfs;
 
-    if ( stat(path, &stst) == -1 )
+    if ( statvfs(path, &stfs) == -1 )
     {
         return 0.0;
     }
+    uint64_t t =  (uint64_t)stfs.f_bsize *  (uint64_t)stfs.f_bfree ;
+    std::cout << "free: " << t << std::endl;
 
-    if ( statfs(path, &stfs) == -1 )
-    {
-        return 0.0;
-    }
-
-    return stfs.f_bavail * ( stst.st_blksize);
+    return t;
 
 }
 
-static double get_disk_total(const char* path)
-{
-    struct stat stst;
-    struct statfs stfs;
-
-    if ( stat(path, &stst) == -1 )
+    static uint64_t get_disk_total(const char* path)
     {
-        return 0.0;
+        struct statvfs stfs;
+        if ( statvfs(path, &stfs) == -1 )
+        {
+            return 0;
+        }
+        uint64_t t = (uint64_t)stfs.f_blocks * (uint64_t)stfs.f_bsize;
+/*        std::cout  << "total for [" << path << "] is:" << t 
+                   << " block size (stfs.f_bsize):" <<   stfs.f_bsize
+                   << " block count (stfs.f_blocks):" << stfs.f_blocks 
+                   << " mul:" << stfs.f_blocks * stfs.f_bsize
+                   << " hardcoded: " << (uint64_t)((uint64_t)4096 * (uint64_t)4902319)
+                   <<  std::endl ;*/
+        return t;
     }
-
-    if ( statfs(path, &stfs) == -1 )
-    {
-        return 0.0;
-    }
-    return stfs.f_blocks * ( stst.st_blksize);
-}
-
 
 static void pretty_print_line(const char *device, const char *fs_type,
                               const char *label, const char *mtpt,
                               const char *uuid, std::stringstream& ss)
 {
-  double total = 0.0;
+  unsigned long long total = 0;
   const char* target = mtpt;
   if(mtpt[0] == '(') return;
   total = get_disk_total(target);
-  double free_space = get_disk_free(target);
+  unsigned long long free_space = get_disk_free(target);
   ss << "<device name = \"" << device
      << "\" fs_type = \"" << fs_type
      << "\" label = \"" << label
      << "\" mountpt = \"" << mtpt
      << "\" total_bytes = \"" << total
      << "\" free_bytes = \"" << free_space << "\" />";
+  std::cout << ss.str();
 }
 
 static void pretty_print_dev(blkid_dev dev, std::stringstream& ss)

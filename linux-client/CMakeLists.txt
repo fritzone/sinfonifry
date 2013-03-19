@@ -5,10 +5,9 @@ set (PROJECT sinfonifry_client)
 project (${PROJECT})
 
 set(${PROJECT}_SOURCES
- part_list.cpp
+ main.cpp
  CACHE INTERNAL ${PROJECT}_SOURCES
 )
-
 
 set (
  ${PROJECT}_HEADERS ""
@@ -16,12 +15,14 @@ set (
 )
 
 add_subdirectory ("../3rdparty/tinyxml"  "${CMAKE_CURRENT_BINARY_DIR}/tinyxml")
+add_subdirectory ("../utils"  "${CMAKE_CURRENT_BINARY_DIR}/utils")
+
+add_subdirectory(plugins)
 
 add_executable(${PROJECT} ${${PROJECT}_SOURCES})
 
-target_link_libraries(${PROJECT} blkid ext2fs cxxtools)
+target_link_libraries(${PROJECT} cxxtools dl)
 
-include_directories("/usr/local/include/" "../3rdparty")
+include_directories("/usr/local/include/" "../3rdparty" "../utils")
 
-
-
+install(TARGETS ${PROJECT} DESTINATION sinfonifry/client)

@@ -1,0 +1,14 @@
+<%pre>
+#include <fstream> // include the class-definition here
+</%pre>
+<%cpp>
+  std::string path = request.getPathInfo();
+  std::string image = path + ".js";
+  std::cout << image << std::endl;
+  std::ifstream fin(image.c_str(), std::ios::in | std::ios::binary);
+  std::ostringstream oss;
+  oss << fin.rdbuf();
+  std::string imageData(oss.str());
+  reply.setContentType("application/javascript");
+  reply.out() << imageData;       // send the image to the client
+</%cpp>

@@ -1,0 +1,74 @@
+<%pre>
+#include <tntdb.h>
+bool is_dot(char c)
+{
+  return c == '.';
+}
+</%pre>
+<html>
+  <head>
+    <script src="/scripts.js"></script>
+    <link rel="stylesheet" href="style.css"></link>
+  </head>
+  <body>
+    <div id="hostlist_container">
+      <div id="hostlist_content">
+        <table cellspacing="0">
+          <%cpp>
+            tntdb::Connection conn = tntdb::connect("postgresql:dbname=sinfonifry user=sinfonifry password=s1nf0n1fry");
+            std::string query_for_hosts = "select host_name, host_ip, host_id, to_char(host_last_seen_time,'YYYY/MM/DD HH24:MI:SS'), host_last_status, host_last_status_text from  sinf01_host order by host_name";
+            tntdb::Result result = conn.select(query_for_hosts);
+            for (tntdb::Result::const_iterator it = result.begin(); it != result.end(); ++it)
+            {
+                tntdb::Row row = *it;
+                std::string hostName("");
+                std::string hostIp("");
+                uint64_t hostId;
+                std::string lastTime;
+                std::string lastStatus;
+                int status=-1;
+                row[0].get(hostName);  // read the host name
+                row[1].get(hostIp);    // read the host IP
+                row[2].get(hostId);    // the host ID
+                row[3].get(lastTime);  // last seen time
+                row[4].get(status);    // the one line status of the host
+                row[5].get(lastStatus);
+                // remove the "." from the text
+                std::string b = hostIp;
+                std::replace(b.begin(), b.end(), '.', '_');
+                std::string backgroundIndicator = "green";
+                std::string icon = "ok.png";
+                switch(status)
+                { // }
+                    case 1:backgroundIndicator = "orange";
+                           icon="warning.png";
+                           break;
+                    case 2:backgroundIndicator = "red";
+                           icon="error.png";
+                           break;
+                    case 3:backgroundIndicator = "white";
+                           icon="hmm.png";
+                           break;
+                }
+                std::stringstream sstooltip;
+                static const std::string NEWLINE("&#13;&#10;");
+                sstooltip << "-IP: " << hostIp << NEWLINE << "- Last Seen:" << lastTime << NEWLINE << "- Status: " << lastStatus;
+                reply.out() << "<tr class=\"" <<backgroundIndicator<<"\">" ; // the row for the current hosts data
+                reply.out() << "<td><img width=\"16\" height=\"16\" src=\"" << icon << "\"></td>";
+                reply.out() << "<td align=\"center\" valign=\"top\">"; // the cell for the host name, with the clickable context
+                reply.out() << "<p class=\"sinfonifry\" align=\"center\">" 
+                                << "<a href=\"javascript:showHide('tableDiskDataFor" << b << "')\" title=\"" << sstooltip.str() << "\">"
+                                << hostName << "</a>";
+                reply.out() <<"</p>"; // the actual IP of the hosts, clicking it will toggle the next field, together with last seen time and status
+                reply.out() << "</td>";  // closing the current cell of the host data
+                reply.out() << "</tr>";  // closing the current row
+            }
+          </%cpp>
+        </table>
+      </div>
+      <div id="menu_footer">
+        <div id="divStatusHostList"></div>
+      </div>
+    </div>
+  </body>
+</html>

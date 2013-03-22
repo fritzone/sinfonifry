@@ -1,0 +1,265 @@
+table.sinfonifry {
+  border-width: thin;
+  border-spacing: 2px;
+  border-style: solid;
+  border-color: gray;
+  border-collapse: separate;
+  background-color: white;
+}
+table.sinfonifry th {
+  border-width: thin;
+  padding: 0px;
+  border-style: none;
+  border-color: gray;
+  background-color: white;
+}
+table.sinfonifry td {
+  border-width: thin;
+  padding: 0px;
+  border-style: none;
+  border-color: gray;
+  background-color: white;
+  }
+p.sinfonifry {
+  font-family: sans-serif;
+  font-style: normal;
+  font-variant: small-caps;
+  font-weight: normal;
+  font-size: medium;
+  line-height: 100%;
+  word-spacing: normal;
+  letter-spacing: normal;
+  text-decoration: none;
+  text-transform: none;
+  text-align: center;
+  text-indent: 0ex;
+}
+span.sinfonifry {
+  font-family: sans-serif;
+  font-style: normal;
+  font-variant: small-caps;
+  font-weight: normal;
+  font-size: medium;
+  line-height: 100%;
+  word-spacing: normal;
+  letter-spacing: normal;
+  text-decoration: none;
+  text-transform: none;
+  text-align: center;
+  text-indent: 0ex;
+}
+p.table_header {
+  font-family: sans-serif;
+  font-style: normal;
+  font-variant: normal;
+  font-weight: bold;
+  font-size: medium;
+  line-height: 100%;
+  word-spacing: normal;
+  letter-spacing: normal;
+  text-decoration: none;
+  text-transform: none;
+  text-align: left;
+  text-indent: 0ex;
+}
+p.table_text {
+  font-family: sans-serif;
+  font-style: normal;
+  font-variant: normal;
+  font-weight: normal;
+  font-size: medium;
+  line-height: 100%;
+  word-spacing: normal;
+  letter-spacing: normal;
+  text-decoration: none;
+  text-transform: none;
+  text-align: left;
+  text-indent: 0ex;
+}
+div.hidden {
+  display:none
+}
+td.hidden {
+  display:none
+}
+tr.hidden {
+  display:none
+}
+table.hidden {
+  display:none
+}
+input.textfield {
+  border-width: 1px;
+  border-style: solid;
+  border-color: #999999;
+  background-repeat: repeat-x;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  color: #333333;
+  width: 200px;
+  height: 22px;
+}
+button {
+  border-width: 1px;
+  border-style: solid;
+  border-color: #999999;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  color: #333333;
+  width: 75px;
+  height: 21px;
+}
+
+tr.d0 {
+        background-color: #C0C9D9; color: black;
+}
+
+tr.green {
+        background-color: #A3FFA3; color: black;
+}
+
+tr.orange {
+        background-color: #FFE066; color: black;
+}
+
+tr.red{
+        background-color: #FF3333; color: black;
+}
+
+tr.white {
+        background-color: #FFFFFF; color: black;
+}
+
+tr {    
+    display: block;
+    width:100%;
+    margin-bottom: 3px;
+}
+
+#page {
+    padding: 0px;
+    width: 300px;
+}
+
+#header,
+#header-inner { /* Note #1 */
+    height: 22px;
+    width: 300px;
+}
+
+.scrolling { /* Note #2 */
+    position: fixed;
+    top: 0;
+}
+
+html,body {
+        margin:0;
+        padding:0;
+        height:100%; /* needed for container min-height */
+        background:gray;
+}
+
+div#menu_container {
+        position:relative; /* needed for footer positioning*/
+        margin:0 auto; /* center, not in IE5 */
+        width:280px;
+        background:#f0f0f0;
+        
+        height:auto !important; /* real browsers */
+        height:100%; /* IE6: treaded as min-height*/
+
+        min-height:100%; /* real browsers */
+}
+
+div#menu_header {
+        padding:1em;
+        border-bottom:6px double gray;
+}
+div#menu_header p {
+        font-style:italic;
+        font-size:1.1em;
+        margin:0;
+}
+
+div#menu_content {
+        padding:1em 1em 5em; /* bottom padding for footer */
+}
+div#menu_content p {
+        text-align:justify;
+        padding:0 1em;
+}
+
+div#menu_footer {
+        position:absolute;
+        width:100%;
+        bottom:0; /* stick to bottom */
+        background:#ddd;
+        border-top:6px double gray;
+}
+
+div#menu_footer p {
+        padding:1em;
+        margin:0;
+}
+
+div#hostlist_container {
+        position:absolute; /* needed for footer positioning*/
+        margin:0 auto; /* center, not in IE5 */
+        width:200px;
+        background:#f0f0f0;
+        
+        height:auto !important; /* real browsers */
+        height:100%; /* IE6: treaded as min-height*/
+
+        min-height:100%; /* real browsers */
+}
+
+div#hostlist_header {
+        padding:1em;
+        border-bottom:6px double gray;
+}
+div#hostlist_header p {
+        font-style:italic;
+        font-size:1.1em;
+        margin:0;
+}
+
+div#hostlist_content {
+        padding:1em 1em 5em; /* bottom padding for footer */
+        border-top:6px double gray;
+}
+div#hostlist_content p {
+        text-align:justify;
+        padding:0 1em;
+}
+
+div#hostlist_footer {
+        position:absolute;
+        width:100%;
+        bottom:0; /* stick to bottom */
+        background:#ddd;
+        border-top:6px double gray;
+}
+
+div#hostlist_footer p {
+        padding:1em;
+        margin:0;
+}
+
+.tooltip{
+    position:absolute;
+    z-index:999;
+    left:-9999px;
+    background-color:#dedede;
+    padding:5px;
+    border:1px solid #fff;
+    width:250px;
+}
+
+.tooltip p{
+    margin:0;
+    padding:0;
+    color:#fff;
+    background-color:#222;
+    padding:2px 7px;
+}

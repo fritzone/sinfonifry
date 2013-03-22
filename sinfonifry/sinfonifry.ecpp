@@ -1,142 +1,19 @@
-<%pre>
-bool is_dot(char c)
-{
-  return c == '.';
-}
-</%pre>
-<%args>
-std::string txtAddHostName;
-std::string txtAddHostIp;
-</%args>
 <%session>
 </%session>
 <html>
-<style type="text/css">
-  table.sinfonifry {
-  border-width: thin;
-  border-spacing: 2px;
-  border-style: solid;
-  border-color: gray;
-  border-collapse: separate;
-  background-color: white;
-}
-table.sinfonifry th {
-  border-width: thin;
-  padding: 0px;
-  border-style: none;
-  border-color: gray;
-  background-color: white;
-}
-table.sinfonifry td {
-  border-width: thin;
-  padding: 0px;
-  border-style: none;
-  border-color: gray;
-  background-color: white;
-}
-p.sinfonifry {
-  font-family: sans-serif;
-  font-style: normal;
-  font-variant: small-caps;
-  font-weight: normal;
-  font-size: medium;
-  line-height: 100%;
-  word-spacing: normal;
-  letter-spacing: normal;
-  text-decoration: none;
-  text-transform: none;
-  text-align: center;
-  text-indent: 0ex;
-}
-p.table_header {
-  font-family: sans-serif;
-  font-style: normal;
-  font-variant: normal;
-  font-weight: bold;
-  font-size: medium;
-  line-height: 100%;
-  word-spacing: normal;
-  letter-spacing: normal;
-  text-decoration: none;
-  text-transform: none;
-  text-align: left;
-  text-indent: 0ex;
-}
-p.table_text {
-  font-family: sans-serif;
-  font-style: normal;
-  font-variant: normal;
-  font-weight: normal;
-  font-size: medium;
-  line-height: 100%;
-  word-spacing: normal;
-  letter-spacing: normal;
-  text-decoration: none;
-  text-transform: none;
-  text-align: left;
-  text-indent: 0ex;
-}
-div.hidden {
-  display:none
-}
-td.hidden {
-  display:none
-}
-table.hidden {
-  display:none
-}
-input.textfield {
-  border-width: 1px;
-  border-style: solid;
-  border-color: #999999;
-  background-repeat: repeat-x;
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 16px;
-  color: #333333;
-  width: 200px;
-  height: 22px;
-}
-button {
-  border-width: 1px;
-  border-style: solid;
-  border-color: #999999;
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 16px;
-  color: #333333;
-  width: 75px;
-  height: 21px;
-}
-tr.d0 td {
-        background-color: #C0C9D9; color: black;
-}
-}
-</style>
+<link rel="stylesheet" href="style.css">      
 
 <head>
    <title>sinfonifry</title>
-   <script src="jquery.js"></script>
    <script type="text/javascript">
     
     var shownElements=new Array();
 
     // generic timer to refresh the page every 10 seconds (10000)
-    var timer=setInterval(function(){getDataFromServer()},10000);
+   // var timer=setInterval(function(){getDataFromServer()},10000);
     // one shot time to load the stuff on page load
-    var oneShotTimer=setTimeout(function(){getDataFromServer()},10);
+    //var oneShotTimer=setTimeout(function(){getDataFromServer()},10);
     
-    function showHide(el)
-    { // }
-      id = document.getElementById(el).style;
-      id.display = (id.display != 'block')? 'block' : 'none';
-      if(id.display != 'none' && el.id != 'tdAddHost')
-      { // somethig was shown. Add to the shown array }
-         shownElements.unshift(el);
-      }
-      else
-      { // something was hidden. Remove it from the shownElements array }
-         shownElements.splice(shownElements.indexOf(el));
-      }
-    }
     
     function forceShow(el)
     { // }
@@ -144,38 +21,6 @@ tr.d0 td {
       id.display = 'block';
     }
 
-    function sendHostToServer()
-    { // }
-      var xmlhttp;
-      if(window.XMLHttpRequest)
-      {
-         xmlhttp=new XMLHttpRequest();
-      }
-      else
-      {
-        xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
-      }
-      xmlhttp.onreadystatechange=function()
-      {
-        if (xmlhttp.readyState==4 && xmlhttp.status==200)
-        {
-          document.getElementById("divForHostAddStatus").innerHTML=xmlhttp.responseText;
-        }
-      }
-      s="/add_host?txtAddHostIp=";
-      s+=document.getElementById("txtAddHostIp").value;
-      s+="&txtAddHostName=";
-      s+=document.getElementById("txtAddHostName").value;
-      xmlhttp.open("GET", s, true);
-      xmlhttp.send();
-    }
-
-    function hideAddHostBox()
-    {
-      showHide('tdAddHost');
-      document.getElementById("divForHostAddStatus").innerHTML="";
-    }
-    
     function getDataFromServer()
     {
       var xmlhttp;
@@ -228,43 +73,26 @@ tr.d0 td {
       xmlhttp.send();
     }
 
+    //jQuery used for simplicity
+    $(window).scroll(function(){ // }
+      $('#header-inner').toggleClass('scrolling', $(window).scrollTop() > $('#header').offset().top); 
+      //can be rewritten long form as:
+      var scrollPosition, headerOffset, isScrolling;
+      scrollPosition = $(window).scrollTop();
+      headerOffset = $('#header').offset().top;
+      isScrolling = scrollPosition > headerOffset;
+      $('#header-inner').toggleClass('scrolling', isScrolling);
+    });
+    
     </script>
+    
 </head>
 
-<body onload="getDatafromServer()">
+<frameset cols="250px,*,300px" frameborder="0">
+  <frame src="/host_list" border="1" noresize name="menu">
+  <frame src="" >
+  <frame src="/menu" border="1" noresize name="menu">
+</frameset> 
 
-   <# the menu system should go to the top #>
-   <table class="sinfonifry">
-   <tr>
-      <td valign="top"><img src="/server_plus.png"></td>
-      <td valign="top">
-         <p class="sinfonifry"><a href="javascript:showHide('tdAddHost')">Add Host</a></p>
-      </td>
-      <td valign="middle" class="hidden" id="tdAddHost">
-       <table>
-       <tr>
-       <td>
-       <form action="">
-           <table>
-           <tr><td> <input placeholder="IP" type="text" name="txtAddHostIp" id="txtAddHostIp" class="textfield"/> </td></tr>
-           <tr><td> <input placeholder="Name" type="text" name="txtAddHostName" id="txtAddHostName" class="textfield"/> </td></tr>
-           <tr><td> <button type="button" onclick="sendHostToServer()">Send</button> </td></tr>
-           <tr><td> <div id="divForHostAddStatus"></div> </td></tr>
-           </table>
-       </form>
-       </td>
-       <td valign ="top">
-        <img src="/close.png" width="16" height="16" onclick="hideAddHostBox()">
-       </td>
-       </tr>
-       </table>
-      </td>
-   </tr>
-   </table>
-
-   <hr>
-
- <# here load the HTML get_data component #>
-  <div id="divForData"></div>
 </body>
 </html>

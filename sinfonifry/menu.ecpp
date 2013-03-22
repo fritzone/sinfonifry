@@ -1,0 +1,50 @@
+<%args>
+std::string txtAddHostName;
+std::string txtAddHostIp;
+</%args>
+<html>
+  <head>
+    <script src="/scripts.js"></script>  
+    <link rel="stylesheet" href="style.css"></link>
+  </head>
+  <body>
+    <div id="menu_container">
+      <div id="menu_header">
+        <p class="sinfonifry"><i>Sinfonifry</i></p>
+      </div>
+      <div id="menu_content">
+        <table>
+          <tr >
+            <td valign="top"><img src="/server_plus.png">
+              <span class="sinfonifry"><a href="javascript:showHide('trAddHost')">Add Host</a></span>
+            </td>  
+          </tr>   
+          
+          <tr valign="middle" class="hidden" id="trAddHost">
+            <td>
+              <table cellspacing="0" width="240px"> <!-- containing a row, with two columns, the first one for the entry table, the second one for the close button -->
+                <tr class="d0">
+                  <td>
+                    <form action="">
+                      <table >
+                        <tr><td> <input placeholder="IP" type="text" name="txtAddHostIp" id="txtAddHostIp" class="textfield"/> </td></tr>
+                        <tr><td> <input placeholder="Name" type="text" name="txtAddHostName" id="txtAddHostName" class="textfield"/> </td></tr>
+                        <tr><td> <button type="button" onclick="sendHostToServer()">Send</button> </td></tr>
+                      </table>
+                    </form>
+                  </td>
+                  <td valign ="top">
+                    <img src="/close.png" width="16" height="16" onclick="hideAddHostBox()">
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </div>
+      <div id="menu_footer">
+        <div id="divStatusMenu"></div>
+      </div>
+    </div>
+  </body>
+</html>

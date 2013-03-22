@@ -50,8 +50,7 @@
         // the table  tableDiskDataForXXXX itself
         // firstly: fetch the latest disk statistics
         std::stringstream ss;
-        ss << "select distinct on (b.disk_mountpoint, b.disk_id, a.disk_stat_free_space, a.disk_stat_measurement_time, b.disk_total_space, b.disk_physical_id ) "
-           << "b.disk_mountpoint, b.disk_id, a.disk_stat_free_space, a.disk_stat_measurement_time, b.disk_total_space, b.disk_physical_id " 
+        ss << "select distinct b.disk_mountpoint, b.disk_id, a.disk_stat_free_space, a.disk_stat_measurement_time, b.disk_total_space, b.disk_physical_id " 
            << "from sinf01_disk b, sinf01_disk_statistics a " 
            << "where b.host_id = " << hostId << " and a.disk_stat_disk_id =b.disk_id and " 
            << "a.disk_stat_measurement_time = (select max(disk_stat_measurement_time) "

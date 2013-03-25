@@ -1,0 +1,6 @@
+#ifndef INSTDIR_H
+#define INSTDIR_H
+
+static const char* instdir="${CMAKE_INSTALL_PREFIX}";
+
+#endif

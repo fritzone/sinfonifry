@@ -24,7 +24,7 @@ protected:
     std::ostringstream ss;
     ss << m_worker->rdbuf();
     std::string s =ss.str();
-    //std::cout << s << std::endl;
+    std::cout << s << std::endl;
     std::string c =m_worker->getPeerAddr();
 
     bool host_need_initialization = true;

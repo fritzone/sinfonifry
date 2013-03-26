@@ -1,19 +1,23 @@
 #include "configuration.h"
 #include <instdir.h>
 #include <cxxtools/net/tcpstream.h>
+#include <cxxtools/log.h>
 
 #include <iostream>
 
 #include <plugin.h>
 #include <plugin_helper.h>
 
+log_define("sinfonifry.client.linux")
+
 int main(int argc, char* argv[])
 {
     std::string inst(instdir);
+    log_init();
     Configuration conf(inst + "/sinfonifry/client/config/config.xml");
     if(!conf.loaded())
     {
-        std::cerr << "Exiting due to lack of configuration" << std::endl;
+        log_error("Exiting due to lack of configuration");
         return 1;
     }
 
@@ -59,10 +63,9 @@ int main(int argc, char* argv[])
         }
         catch(const std::exception& ex)
         {
-            std::cout << ex.what() << std::endl;
+            log_error(ex.what());
             exception_counter ++;
         }
-        std::cout << "sleeping: " << exception_counter * sleep_time << std::endl;
         sleep(exception_counter * sleep_time);
     }
 }

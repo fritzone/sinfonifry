@@ -1,4 +1,3 @@
-
 #include <exception>
 #include <iostream>
 #include <cxxtools/net/tcpstream.h>
@@ -11,6 +10,10 @@
 #include <cxxtools/condition.h>
 #include "tinyxml/tinyxml.h"
 #include "tntdb.h"
+#include "configuration.h"
+#include <instdir.h>
+
+log_define("sinfonifry.core")
 
 class ClientThread : public cxxtools::DetachedThread
 {
@@ -24,7 +27,7 @@ protected:
     std::ostringstream ss;
     ss << m_worker->rdbuf();
     std::string s =ss.str();
-    std::cout << s << std::endl;
+    log_debug(s);
     std::string c =m_worker->getPeerAddr();
 
     bool host_need_initialization = true;
@@ -44,7 +47,7 @@ protected:
             if(a == 0 || a == -1)
             {
                 // this host is not enabled
-                std::cout << "Not allowed:" << c << std::endl;
+                log_error("Host is not allowed to connect: " << c);
                 return;
             }
         }
@@ -220,7 +223,7 @@ protected:
                     row[0].get(found_disk_id);  // read column 0 into variable a
                     if(found_disk_id == 0)      //  this means, the host was not in the database till now
                     {
-                        std::cout << "no disk id found for " <<host_id << " and " << disk_part_name;
+                        log_error("No disk id found for " << host_id << " and " << disk_part_name);
                         return;
                     }
                     }
@@ -270,7 +273,7 @@ protected:
             } // devices node was found
             else
             {
-                std::cout << "no root" << std::endl;
+                log_error("Malformatted query, no root element found");
             }
 
             conn.close();
@@ -278,7 +281,7 @@ protected:
     }
     catch (const std::exception& e)
     {
-        std::cerr << e.what() << std::endl;
+        log_error(e.what());
     }
     m_worker->close();
   }
@@ -291,24 +294,35 @@ static const int BUFSIZE = 1024 * 1024;
 
 int main(int argc, char* argv[])
 {
-  try
-  {
-    log_init();
-    cxxtools::Arg<const char*> ip(argc, argv, 'i', "0.0.0.0");
-    // listen to a port
-    cxxtools::net::TcpServer server(ip.getValue(), 29888);
-
-    while(1)
+    try
     {
-      // accept a connetion
-      cxxtools::net::iostream* worker = new cxxtools::net::iostream(server, BUFSIZE);
-      (new ClientThread(worker))->start();
+        std::string inst(instdir);
+        Configuration conf(inst + "/sinfonifry/core/config/config.xml");
+        if(!conf.loaded())
+        {
+            log_error("Exiting due to lack of configuration");
+            return 1;
+        }
 
+        log_init();
+
+        std::string ip = conf.getConfigSetting("core", "bind_to", "0.0.0.0");
+        int port = atoi(conf.getConfigSetting("core", "bind_port", "29888").c_str());
+
+        // listen to a port
+        cxxtools::net::TcpServer server(ip.c_str(), port);
+
+        while(1)
+        {
+            // accept a connetion
+            cxxtools::net::iostream* worker = new cxxtools::net::iostream(server, BUFSIZE);
+            (new ClientThread(worker))->start();
+
+        }
     }
-  }
-  catch (const std::exception& e)
-  {
-    std::cerr << e.what() << std::endl;
-  }
+    catch (const std::exception& e)
+    {
+        log_error(e.what());
+    }
 }
 

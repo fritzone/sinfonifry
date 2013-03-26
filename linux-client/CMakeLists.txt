@@ -35,3 +35,4 @@ include_directories(
 )
 
 install(TARGETS ${PROJECT} DESTINATION sinfonifry/client)
+install(FILES log.properties DESTINATION sinfonifry/client)

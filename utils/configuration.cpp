@@ -30,10 +30,10 @@ std::string Configuration::getConfigSetting(const std::string& component,
             std::cerr << "Wrong xml file. No component node" << std::endl;
             return defaultValue;
         }
-        el = el->FirstChildElement("config");
+        el = el->FirstChildElement("configuration");
         if(!el)
         {
-            std::cerr << "Wrong xml file. No <config> node in component node"
+            std::cerr << "Wrong xml file. No <configuration> in component node"
                       << std::endl;
             return defaultValue;
         }

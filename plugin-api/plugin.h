@@ -24,24 +24,24 @@ extern "C" {
 
 #include "commons.h"
 
-enum ALLOCATION_BEHAVIOR
-{
-    DO_NOT_FREE_ME = 0,
-    FREE_ME = 1,
-
-    LAST
-};
-
 /**
  * @brief execute - this is the method which does the real work of the
  *                  plugin, (ie: it gathers the data this plugin is supposed
  *                  to send back to the server, formats it in a way that the
  *                  core components plugin understands it and returns it).
- *                  Always return dynamically allocated memory with malloc
- *                  or calloc the caller of this method IS FREEING the returned
- *                  value with free if you set the *free_returned_value to 1.
  *
- * @param free_returned_value - whether to free the returned value or not.
+ *                  The returned data will be rendered in the response XML under
+ *                  the "<plugin_data>" node, inside the plugin element, like:
+ *                  <plugin name=@see name()>
+ *                    ... HERE GOES THE RETURN VALUE OF THE execute() METHOD ...
+ *                  </plugin>
+  *
+ * @param free_returned_value - how to deal with the data that is returned.
+ *                  The following values are possible:
+ *
+ *                  DO_NOT_FREE_ME - the caller function does not free the data.
+ *                  FREE_ME - free the data with the function free().
+ *                  DELETE_ME - free the allocated memory with delete []
  *
  * @return - the gathered data formatted for the core side component. If this
  *           return NULL or empty string it is ignored by the caller.
@@ -49,19 +49,39 @@ enum ALLOCATION_BEHAVIOR
 char* execute(ALLOCATION_BEHAVIOR* free_returned_value);
 
 /**
- * @brief component returns the @see PLUGIN_COMPONENT of this plugin
+ * @brief component - returns the @see PLUGIN_COMPONENT of this plugin (ie: the
+ *        type of the plugin).
+ *
  * @return the @see PLUGIN_COMPONENT of this plugin
  */
 PLUGIN_COMPONENT component();
 
 /**
- * @brief load - loads the
- * @return
+ * @brief load - called when the system loads this plugin. Do one time
+ *               initialization here, and return the correct status.
+ *
+ * @return PLUGIN_LOADED - in case of success.
+ *         PLUGIN_LOADED_WITH_WARNINGS  - in case the plugin loaded, but some
+ *                         warnings were recorded during the load sequence.
+ *         PLUGIN_LOAD_FAILED - in case the plugin failed to load.
+ *         PLUGIN_LOAD_SYSTEM_FAILURE - in case the system cannot continue
+ *                         loading.
+ *
+ *         Any other value will be treated with an ERROR level entry in the log
+ *         file and the plugin will not be added to the loaded plugins (ie: it
+ *         will be unloaded).
  */
-int load();
+PLUGIN_LOAD_STATUS load();
 
-// called when the system goes down.
-void unload();
+/**
+ * @brief unload - This method is called either when the sinfonifry system shuts
+ *                 down, and all the plugins are unloaded or when there was a
+ *                 specific request for the plugin to be unloaded from the
+ *                 system (initiated from the web gui)
+ *
+ * @param reason - tells us why the plugin is being unloaded.
+ */
+PLUGIN_UNLOAD_STATUS unload(PLUGIN_UNLOAD_REQUEST reason);
 
 // an internal about string. User should NOT free the data returned from here
 const char* about();

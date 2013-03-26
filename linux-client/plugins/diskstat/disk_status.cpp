@@ -13,6 +13,10 @@
 #include "utils.h"
 #include <plugin.h>
 
+#include <cxxtools/log.h>
+
+log_define("sinfonifry.client.linux.plugin.disk_stat")
+
 static const int port = 29888;
 
 static void pretty_print_line(const char *device, const char *fs_type,

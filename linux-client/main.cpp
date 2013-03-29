@@ -4,8 +4,9 @@
 #include <cxxtools/log.h>
 
 #include <iostream>
+#include <unistd.h>
 
-#include <plugin.h>
+#include <plugin-client.h>
 #include <plugin_helper.h>
 
 log_define("sinfonifry.client.linux")

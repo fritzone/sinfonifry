@@ -11,7 +11,7 @@
 #include <ctime>
 
 #include "utils.h"
-#include <plugin.h>
+#include <plugin-client.h>
 
 #include <cxxtools/log.h>
 
@@ -128,8 +128,9 @@ char* execute(ALLOCATION_BEHAVIOR *free_returned_value)
 }
 
 // called upon loading the plugin. Internal initialization can be done
-int load()
+PLUGIN_LOAD_STATUS load()
 {
+	return PLUGIN_LOADED;
 }
 
 // called when the system goes down.

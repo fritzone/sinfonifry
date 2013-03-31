@@ -44,9 +44,10 @@ char* execute(ALLOCATION_BEHAVIOR* free_returned_value);
 
 /**
  * @brief component - returns the @see PLUGIN_COMPONENT of this plugin (ie: the
- *                    type of the plugin). This is just a security check, to
- *                    make it possible to prevent the loading of non client
- *                    plugins into the client component.
+ *                    component to which the plugin belongs). 
+ * 
+ *                    This is just a security check, to make it possible to 
+ *                    prevent the loading of non client plugins into the client.
  *
  *                    This method for the client plugins should always return
  *                    the PLUGIN_CLIENT value.
@@ -81,6 +82,16 @@ PLUGIN_LOAD_STATUS load();
  *                 system (initiated from the web gui)
  *
  * @param reason - tells us why the plugin is being unloaded.
+ * 
+ * @return PLUGIN_UNLOAD_STATUS_PROCEED - in case of success
+ *         PLUGIN_UNLOAD_STATUS_TRY_AGAIN - in case the system should try to
+ *                 unload te plugin again.
+ * 	       PLUGIN_UNLOAD_STATUS_FAILED - in case of a failure.
+ * 
+ *         @see PLUGIN_UNLOAD_STATUS for detailed description.
+ *       
+ *         Any other value will be treated with an ERROR level entry in the log 
+ *         file and the plugin will be removed.
  */
 PLUGIN_UNLOAD_STATUS unload(PLUGIN_UNLOAD_REQUEST reason);
 

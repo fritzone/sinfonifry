@@ -106,11 +106,24 @@ const char* about();
 
 /**
  * @brief name - returns the name of the plugin. This name should be the same as
- *               in the configuration file.
+ *               in the configuration file. The caller of the function does not 
+ *               free the returned data, so in case to avoid memory leaks return
+ *               here a string which was not allocated dynamically.
  *
  * @return the name of the plugin
  */
 const char* name();
+
+/**
+ * @brief signature - returns the signed identity of the plugin. Signed 
+ *                    identities are allocated by the project, in order to keep
+ *                    track of the plugins. Return 0 (or NULL, depending on
+ *                    your system) in case of an unsigned plugin. The caller
+ *                    does not free the returned data.
+ * 
+ *  @return the signature of the plugin.
+ **/
+const char* signature();
 
 /**
  * @brief setup - this function provides internal setup functionality for the
@@ -131,20 +144,41 @@ const char* name();
  *                4. This command is sent to the client side of the
  *                   plugin triumvirate and this setup() method takes care of
  *                   the action.
+ * 
+ *                The setup method should not free the commands' parameter.
  *
  * @return any value you consider to be useful and which can be handled by the
  *         web gui.
  */
-int setup(const char* commands);
+const char* setup(const char* commands);
 
 /*****************************************************************************
  *             Typedefs used for the function pointers                       *
  *****************************************************************************/
 
-/* typedef for the execute(ALLOCATION_BEHAVIOR*) function */
-typedef char* (*PEXECUTE)(ALLOCATION_BEHAVIOR*);
+/** typedef for the @see execute(ALLOCATION_BEHAVIOR*) function */
+typedef char* (*P_CLIENT_EXECUTE)(ALLOCATION_BEHAVIOR*);
 
+/** typedef for the @see setup(const char*) function */
+typedef const char* (*P_CLIENT_SETUP)(const char*);
 
+/** typedef for the @see component() function */
+typedef PLUGIN_COMPONENT (*P_CLIENT_COMPONENT)();
+
+/** typedef for the @see load() function */
+typedef PLUGIN_LOAD_STATUS (*P_CLIENT_LOAD)();
+
+/** typedef for the @see unload() function */
+typedef PLUGIN_UNLOAD_STATUS (*P_CLIENT_UNLOAD)(PLUGIN_UNLOAD_REQUEST);
+
+/** typedef for the @see about() function */
+typedef const char* (*P_CLIENT_ABOUT)();
+
+/** typedef for the @see name() function */
+typedef const char* (*P_CLIENT_NAME)();
+
+/** typedef for the @see signature() function */
+typedef const char* (*P_CLIENT_SIGNATURE)();
 
 #ifdef __cplusplus
 }

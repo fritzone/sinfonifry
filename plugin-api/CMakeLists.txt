@@ -3,6 +3,7 @@ set (PLUGIN_API_SOURCES
 
 set (PLUGIN_API_HEADERS
  plugin.h
+ commons.h
 )
 
 list(APPEND ${PROJECT}_SOURCES ${PLUGIN_API_SOURCES} )

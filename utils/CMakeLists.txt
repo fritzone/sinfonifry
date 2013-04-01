@@ -7,6 +7,7 @@ set (UTIL_SOURCES
 
 set (UTIL_HEADERS
  configuration.h
+ utils.h
 )
 
 list(APPEND ${PROJECT}_SOURCES ${UTIL_SOURCES} )

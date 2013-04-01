@@ -7,16 +7,16 @@
  *        the situation where the core component tries to load a client
  *        plugin for example).
  *
- *        PLUGIN_CLIENT - this is a client side plugin. This plugin is expected
+ *        \li PLUGIN_CLIENT - this is a client side plugin. This plugin is expected
  *                        to offer functionality as per the client plugin
  *                        requirements, ie. send back statistical data that will
  *                        be handled by the corresponding core level plugin.
  *
- *        PLUGIN_CORE - this is a core component. This is supposed to prepare
+ *        \li PLUGIN_CORE - this is a core component. This is supposed to prepare
  *                      the data of the corresponding client plugin for further
  *                      visualization by the corresponding visualization plugin.
  *
- *        PLUGIN_VISUALIZATION - this a visualization plugin. In the current
+ *        \li PLUGIN_VISUALIZATION - this a visualization plugin. In the current
  *                      system architecture this is a library that will be
  *                      loaded by the visualization part and should produce
  *                      data that is understandeable by the above layer.

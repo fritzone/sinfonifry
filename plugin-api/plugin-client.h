@@ -15,27 +15,29 @@ extern "C" {
 #include "commons.h"
 
 /**
- * @brief execute - this is the method which does the real work of the
- *                  plugin, (ie: it gathers the data this plugin is supposed
- *                  to send back to the server, formats it in a way that the
- *                  core components plugin understands it and returns it).
+ * @brief This is the method which does the real work of the plugin.
  *
- *                  The returned data will be rendered in the response XML under
- *                  the "<plugin_data>" node, inside the plugin element, like:
+ * It gathers the data this plugin is supposed to send back to the server,
+ * formats it in a way that the core components corresponding plugin understands
+ * it and returns it).
+ *
+ * The returned data will be rendered in the response XML unde  the @code
+ * {<plugin_data>} node, inside the plugin element, like:
+ * @code
  *                  <plugin name=@see name()>
  *                    ... HERE GOES THE RETURN VALUE OF THE execute() METHOD ...
  *                  </plugin>
+ * @endcode
+ * This method is called at regular intervals while running, this value is
+ * specified in the "frequency" setting of the specific plugin. For the values
+ * the "frequency" setting can take please refer to the configuration doc.
  *
- *                  This method is called at regular intervals while running,
- *                  this value is specified in the "frequency" setting of the
- *                  specific plugin.
+ * @param free_returned_value [out] - how to deal with the data that is
+ * returned. The following values are possible:
  *
- * @param free_returned_value - how to deal with the data that is returned.
- *                  The following values are possible:
- *
- *                  DO_NOT_FREE_ME - the caller function does not free the data.
- *                  FREE_ME - free the data with the function free().
- *                  DELETE_ME - free the allocated memory with delete []
+ *   @li DO_NOT_FREE_ME - the caller function does not free the data.
+ *   @li FREE_ME - free the data with the function free().
+ *   @li DELETE_ME - free the allocated memory with delete []
  *
  * @return - the gathered data formatted for the core side component. If this
  *                  returns NULL or empty string it is ignored by the caller.

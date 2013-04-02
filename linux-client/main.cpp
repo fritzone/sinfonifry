@@ -6,7 +6,7 @@
 #include <iostream>
 #include <unistd.h>
 
-#include <plugin-client.h>
+#include <sinfonifry_plugin_client.h>
 #include <plugin_helper.h>
 
 log_define("sinfonifry.client.linux")
@@ -42,7 +42,10 @@ int main(int argc, char* argv[])
             main_xml += plugins[i]->name;
             main_xml += "\">";
             ALLOCATION_BEHAVIOR what_to_do = DO_NOT_FREE_ME;
-            char* c = plugins[i]->execute(&what_to_do);
+            plugin_descriptor* pd = plugins[i];
+            client_plugin_descriptor* cpd =
+                    static_cast<client_plugin_descriptor*>(pd);
+            char* c = cpd->f_execute(&what_to_do);
             main_xml += c;
             main_xml += "</plugin>";
             if(what_to_do == FREE_ME)

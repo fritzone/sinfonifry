@@ -1,6 +1,9 @@
 #include "configuration.h"
+#include <cxxtools/log.h>
 
 #include <iostream>
+
+log_define("sinfonifry.util.configuration")
 
 using namespace std;
 
@@ -9,7 +12,7 @@ Configuration::Configuration(std::string file) : m_doc(), m_configLoaded(false)
     m_doc.LoadFile(file.c_str());
     if(m_doc.Error())
     {
-        std::cerr << "Cannot load config file:" << file << std::endl;
+        log_error("Cannot load config file:" << file);
         return;
     }
     m_configLoaded = true;
@@ -27,14 +30,13 @@ std::string Configuration::getConfigSetting(const std::string& component,
         el = el->FirstChildElement(component.c_str());
         if(!el)
         {
-            std::cerr << "Wrong xml file. No component node" << std::endl;
+            log_error ("Wrong xml file. No component node: " << component);
             return defaultValue;
         }
-        el = el->FirstChildElement("configuration");
+        el = el->FirstChildElement("config");
         if(!el)
         {
-            std::cerr << "Wrong xml file. No <configuration> in component node"
-                      << std::endl;
+            log_error ("Wrong xml file. No <config> node in component node");
             return defaultValue;
         }
         // get the attribute
@@ -59,14 +61,13 @@ vector<string> Configuration::getPlugins(const std::string &component) const
         el = el->FirstChildElement(component.c_str());
         if(!el)
         {
-            std::cerr << "Wrong xml file. No component node" << std::endl;
+            log_error ("Wrong xml file. No component node: " << component);
             return result;
         }
         el = el->FirstChildElement("plugins");
         if(!el)
         {
-            std::cerr << "Wrong xml file. No <plugins> node in component node"
-                      << std::endl;
+            log_error("Wrong xml file. No <plugins> node in component node");
             return result;
         }
         // now loop through the plugins and the ones that are enabled send back
@@ -104,14 +105,13 @@ string Configuration::getConfigSettingForPlugin(const std::string& component,
         el = el->FirstChildElement(component.c_str());
         if(!el)
         {
-            std::cerr << "Wrong xml file. No component node" << std::endl;
+            log_error ("Wrong xml file. No component node:" << component);
             return defaultValue;
         }
         el = el->FirstChildElement("plugins");
         if(!el)
         {
-            std::cerr << "Wrong xml file. No <plugins> node in component node"
-                      << std::endl;
+            log_error("Wrong xml file. No <plugins> node in component node");
             return defaultValue;
         }
         // now loop through the plugins and the ones that are enabled send back
@@ -133,9 +133,9 @@ string Configuration::getConfigSettingForPlugin(const std::string& component,
                     const char* attr = el_plugin->Attribute(setting.c_str());
                     if(!attr)
                     {
-                        std::cerr << "No " << setting << " in the config file"
+                        log_error("No " << setting << " in the config file"
                                  << " for plugin " << plugin << ", component"
-                                  << component << "." << std::endl;
+                                  << component << ".");
                         return defaultValue;
                     }
                     return std::string(attr);

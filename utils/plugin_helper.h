@@ -2,7 +2,7 @@
 #define PLUGIN_HELPER_H
 
 #include <vector>
-#include "plugin-client.h"
+#include "sinfonifry_plugin_client.h"
 
 class Configuration;
 
@@ -24,10 +24,24 @@ struct plugin_descriptor
     // the handle of the library
     void* lib_handle;
 
-    // the function pointer which returns the current data of the plugin
+    P_COMPONENT f_component;
 
-    PEXECUTE execute;
+    P_LOAD f_load;
 
+    P_UNLOAD f_unload;
+
+    P_ABOUT f_about;
+
+    P_NAME f_name;
+
+    P_SIGNATURE f_signature;
+};
+
+struct client_plugin_descriptor : public plugin_descriptor
+{
+    P_CLIENT_EXECUTE f_execute;
+
+    P_CLIENT_SETUP f_setup;
 };
 
 

@@ -2,8 +2,9 @@ set (PLUGIN_API_SOURCES
 )
 
 set (PLUGIN_API_HEADERS
- plugin.h
  commons.h
+ plugin.h
+ sinfonifry_errors.h
 )
 
 list(APPEND ${PROJECT}_SOURCES ${PLUGIN_API_SOURCES} )

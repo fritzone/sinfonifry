@@ -11,7 +11,7 @@
 #include <ctime>
 
 #include "utils.h"
-#include <plugin-client.h>
+#include <sinfonifry_plugin_client.h>
 
 #include <cxxtools/log.h>
 
@@ -151,7 +151,7 @@ const char* name()
 }
 
 // does some setup work. Plugin dependent
-int setup(const char*)
+const char* setup(const char*)
 {
-    return 1;
+    return 0;
 }

@@ -12,13 +12,17 @@
 #include "tntdb.h"
 #include "configuration.h"
 #include <instdir.h>
+#include <plugin_helper.h>
+#include <db_utils.h>
 
 log_define("sinfonifry.core")
+
+using namespace sinfonifry;
 
 class ClientThread : public cxxtools::DetachedThread
 {
 public:
-  ClientThread(cxxtools::net::iostream* worker) : m_worker(worker) {}
+  ClientThread(cxxtools::net::iostream* worker, const Configuration* conf) : m_worker(worker), m_conf(conf) {}
 
 protected:
   void run()
@@ -28,29 +32,41 @@ protected:
     ss << m_worker->rdbuf();
     std::string s =ss.str();
     log_debug(s);
-    std::string c =m_worker->getPeerAddr();
+    std::string c = m_worker->getPeerAddr();
 
     bool host_need_initialization = true;
     uint32_t host_id = 0;
 
-    // now do the database work
+    // first step: see if this client is allowed to connect to us
     try
     {
-        tntdb::Connection conn = tntdb::connect("postgresql:dbname=sinfonifry user=sinfonifry password=s1nf0n1fry");
-        //see if this host is allowed to send data
+        tntdb::Connection conn = tntdb::connect(sinfonifry::get_master_connection_string(m_conf));
+
+        std::string query_for_find_host_in_allowed_tables = "select count(*) from sinf01_allowed_hosts where allowed_host_ip = '" + c + "'";
+        tntdb::Result result = conn.select(query_for_find_host_in_allowed_tables);
+        tntdb::Row row = *result.begin();
+        int a = -1;
+        row[0].get(a);  // read column 0 into variable a
+        if(a == 0 || a == -1)
         {
-            std::string query_for_find_host_in_allowed_tables = "select count(*) from sinf01_allowed_hosts where allowed_host_ip = '" + c + "'";
-            tntdb::Result result = conn.select(query_for_find_host_in_allowed_tables);
-            tntdb::Row row = *result.begin();
-            int a = -1;
-            row[0].get(a);  // read column 0 into variable a
-            if(a == 0 || a == -1)
-            {
-                // this host is not enabled
-                log_error("Host is not allowed to connect: " << c);
-                return;
-            }
+            // this host is not enabled
+            log_error("Host is not allowed to connect: " << c);
+            m_worker->close();
+            return;
         }
+
+        conn.close();
+    }
+    catch (const std::exception& e)
+    {
+            log_error("Cannot check if the host is allowed to connect or not: " << e.what());
+            m_worker->close();
+            return;
+    }
+
+    try
+    {
+        tntdb::Connection conn = tntdb::connect(sinfonifry::get_master_connection_string(m_conf));
 
         // see if this host is in the stage of "init"
         {
@@ -288,26 +304,29 @@ protected:
 
 private:
   cxxtools::net::iostream* m_worker;
+  const Configuration* m_conf;
 };
 
 static const int BUFSIZE = 1024 * 1024;
 
 int main(int argc, char* argv[])
 {
+    log_init("log.properties");
+
     try
     {
         std::string inst(instdir);
-        Configuration conf(inst + "/sinfonifry/core/config/config.xml");
-        if(!conf.loaded())
+        Configuration *conf = new Configuration(inst + "/sinfonifry/core/config/config.xml");
+        if(!conf->loaded())
         {
             log_error("Exiting due to lack of configuration");
             return 1;
         }
 
-        log_init();
+        std::vector<plugin_descriptor*> plugins = get_plugins(PLUGIN_CORE, conf);
 
-        std::string ip = conf.getConfigSetting("core", "bind_to", "0.0.0.0");
-        int port = atoi(conf.getConfigSetting("core", "bind_port", "29888").c_str());
+        std::string ip = conf->getConfigSetting("core", "bind_to", "0.0.0.0");
+        int port = atoi(conf->getConfigSetting("core", "bind_port", "29888").c_str());
 
         // listen to a port
         cxxtools::net::TcpServer server(ip.c_str(), port);
@@ -316,7 +335,7 @@ int main(int argc, char* argv[])
         {
             // accept a connetion
             cxxtools::net::iostream* worker = new cxxtools::net::iostream(server, BUFSIZE);
-            (new ClientThread(worker))->start();
+            (new ClientThread(worker, conf))->start();
 
         }
     }

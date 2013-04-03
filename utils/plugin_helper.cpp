@@ -10,12 +10,13 @@
 #include <iostream>
 
 log_define("sinfonifry.util.plugin_helper")
-
-std::vector<plugin_descriptor*> get_plugins(PLUGIN_COMPONENT comp,
-                                            const Configuration& conf)
+namespace sinfonifry
 {
-    std::string comp_name = component_name_from_component_code(comp);
-    std::vector<std::string> plugin_names = conf.getPlugins(comp_name);
+std::vector<plugin_descriptor*> get_plugins(PLUGIN_COMPONENT comp,
+                                            const Configuration* conf)
+{
+    std::string comp_name = sinfonifry::component_name_from_component_code(comp);
+    std::vector<std::string> plugin_names = conf->getPlugins(comp_name);
     std::vector<plugin_descriptor*> plugins;
     for(int i=0; i<plugin_names.size(); i++)
     {
@@ -70,4 +71,5 @@ std::vector<plugin_descriptor*> get_plugins(PLUGIN_COMPONENT comp,
 
     }
     return plugins;
+}
 }

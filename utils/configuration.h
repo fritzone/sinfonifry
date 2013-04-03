@@ -34,7 +34,7 @@ public:
 */
     std::string getConfigSetting(const std::string& component,
                                  const std::string& setting,
-                                 std::string defaultValue);
+                                 const std::string& defaultValue) const;
 
     bool loaded() const
     {

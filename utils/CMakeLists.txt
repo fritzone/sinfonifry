@@ -3,6 +3,7 @@ set (UTIL_SOURCES
  ${CMAKE_CURRENT_SOURCE_DIR}/components.cpp
  ${CMAKE_CURRENT_SOURCE_DIR}/plugin_helper.cpp
  ${CMAKE_CURRENT_SOURCE_DIR}/utils.cpp
+ ${CMAKE_CURRENT_SOURCE_DIR}/db_utils.cpp
 )
 
 set (UTIL_HEADERS

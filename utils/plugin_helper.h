@@ -3,8 +3,12 @@
 
 #include <vector>
 #include "sinfonifry_plugin_client.h"
+#include "components.h"
 
 class Configuration;
+
+namespace sinfonifry
+{
 
 /*
  * Data below is used by the components to identify the plugin structure
@@ -46,6 +50,8 @@ struct client_plugin_descriptor : public plugin_descriptor
 
 
 std::vector<plugin_descriptor*> get_plugins(PLUGIN_COMPONENT,
-                                            const Configuration &conf);
+                                            const Configuration *conf);
+
+}
 
 #endif // PLUGIN_HELPER_H

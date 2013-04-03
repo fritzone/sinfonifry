@@ -119,7 +119,7 @@ const char* signature();
  * Returns the last error. For a detailed description of the common error codes
  * together with their meaning please consult the error documentation, otherwise
  * the plugin is responsible for providing error codes that start after the
- * value @link @c SINFONIFRY_LAST_ERROR @endlink
+ * value @c SINFONIFRY_LAST_ERROR .
  *
  * @return The last error.
  */
@@ -128,7 +128,8 @@ int last_error();
 /**
  * @brief Return the last error text.
  *
- * Returns the last error in a human readablae form. The user should not free
+ * Returns the last error in a human readable form. The user should not free the
+ * returned data.
  *
  * @return The last error.
  */

@@ -20,11 +20,12 @@ Configuration::Configuration(std::string file) : m_doc(), m_configLoaded(false)
 
 std::string Configuration::getConfigSetting(const std::string& component,
                                             const std::string& setting,
-                                            std::string defaultValue)
+                                            const std::string& defaultValue)
+const
 {
     if(!m_configLoaded) return defaultValue;
 
-    TiXmlElement* el = m_doc.FirstChildElement("sinfonifry");
+    const TiXmlElement* el = m_doc.FirstChildElement("sinfonifry");
     if(el)
     {
         el = el->FirstChildElement(component.c_str());

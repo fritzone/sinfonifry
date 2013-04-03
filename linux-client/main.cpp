@@ -9,24 +9,28 @@
 #include <sinfonifry_plugin_client.h>
 #include <plugin_helper.h>
 
+using namespace sinfonifry;
+
 log_define("sinfonifry.client.linux")
 
 int main(int argc, char* argv[])
 {
     std::string inst(instdir);
-    log_init();
-    Configuration conf(inst + "/sinfonifry/client/config/config.xml");
-    if(!conf.loaded())
+    log_init("log.properties");
+
+    Configuration *conf = new 
+                   Configuration(inst + "/sinfonifry/client/config/config.xml");
+    if(!conf->loaded())
     {
         log_error("Exiting due to lack of configuration");
         return 1;
     }
 
-    std::string core_host = conf.getConfigSetting("client", "core-host",
+    std::string core_host = conf->getConfigSetting("client", "core-host",
                                                   "127.0.0.1");
-    int port = atoi(conf.getConfigSetting("client",
+    int port = atoi(conf->getConfigSetting("client",
                                           "core-port", "29888").c_str());
-    int sleep_time = atoi(conf.getConfigSetting("client", "sleep-time-sec",
+    int sleep_time = atoi(conf->getConfigSetting("client", "sleep-time-sec",
                                                 "60").c_str());
 
     std::vector<plugin_descriptor*> plugins = get_plugins(PLUGIN_CLIENT, conf);
@@ -51,6 +55,11 @@ int main(int argc, char* argv[])
             if(what_to_do == FREE_ME)
             {
                 free(c);
+            }
+            else
+            if(what_to_do == DELETE_ME)
+            {
+                delete [] c;
             }
         }
         main_xml += "</plugin_data>";

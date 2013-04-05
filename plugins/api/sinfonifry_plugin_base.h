@@ -3,7 +3,7 @@
 
 /******************************************************************************
  * This header contains the method declarations that are to be shared by all  *
- * the plugins of the sinfonifry system, regardless of the component.
+ * the plugins of the sinfonifry system, regardless of the component.         *
  ******************************************************************************/
 
 #ifdef __cplusplus
@@ -14,20 +14,20 @@ extern "C" {
 #include "sinfonifry_errors.h"
 
 /*****************************************************************************
- *          Methods that are exposed by all the sinfonifry plugins            *
+ *          Methods that are exposed by all the sinfonifry plugins           *
  *****************************************************************************/
 
 /**
- * @brief Retrieve the component to which this plugin belongs
+ * @brief Retrieve the component to which this plugin belongs.
  *
- * This method returns the @link @c PLUGIN_COMPONENT @endlink of this plugin
+ * This method returns the @link PLUGIN_COMPONENT @endlink of this plugin
  * (ie: the component to which the plugin belongs). This implements a security
  * check,to make it possible to prevent the loading of non client plugins into
  * the client. This method f or the client plugins should always return the
  * PLUGIN_CLIENT value. If this method returns invalid data the plugin will
  * not be loaded in the client component.
  *
- * @return The @link @c PLUGIN_COMPONENT @endlink of this plugin.
+ * @return The @link PLUGIN_COMPONENT @endlink of this plugin.
  *
  * @see @c PLUGIN_COMPONENT for a description of the values
  */
@@ -68,7 +68,7 @@ PLUGIN_LOAD_STATUS load();
  * @return @li @c PLUGIN_UNLOAD_STATUS_PROCEED - in case of success
  *         @li @c PLUGIN_UNLOAD_STATUS_TRY_AGAIN - in case the system should try
  *                to unload te plugin again.
- * 	       @li @c PLUGIN_UNLOAD_STATUS_FAILED - in case of a failure.
+ *             @li @c PLUGIN_UNLOAD_STATUS_FAILED - in case of a failure.
  *
  *         Any other value will be treated with an ERROR level entry in the log
  *         file and the plugin will be removed.

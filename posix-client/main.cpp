@@ -19,7 +19,7 @@ int main(int argc, char* argv[])
     log_init("log.properties");
 
     Configuration *conf = new 
-                   Configuration(inst + "/sinfonifry/client/config/config.xml");
+                   Configuration(inst + "/sinfonifry/config/config.xml");
     if(!conf->loaded())
     {
         log_error("Exiting due to lack of configuration");

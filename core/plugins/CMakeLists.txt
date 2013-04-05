@@ -14,14 +14,7 @@ set(CONFIG_FILE ${CMAKE_CURRENT_BINARY_DIR}/config.xml)
 # the configuration directory
 FILE(WRITE  ${CONFIG_FILE} "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
 FILE(APPEND ${CONFIG_FILE} "<sinfonifry>\n")
-FILE(APPEND ${CONFIG_FILE} " <core>\n")
-FILE(APPEND ${CONFIG_FILE} " <config bind_to=\"${CORE_CONFIG_BIND_IP}\"
-                                     bind_port=\"${CORE_CONFIG_BIND_PORT}\"
-                                     db_user=\"${CORE_CONFIG_DB_USER}\"
-                                     db_pass=\"${CORE_CONFIG_DB_PASS}\"
-                                     db_host=\"${CORE_CONFIG_DB_HOST_IP}\"
-                                     db_name=\"${CORE_CONFIG_DB}\"
-                             />\n")
+
                                             
 FILE(APPEND ${CONFIG_FILE} " <plugins>\n")
 

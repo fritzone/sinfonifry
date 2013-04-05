@@ -18,12 +18,13 @@ set (
 
 add_subdirectory ("${SINFONIFRY_ROOT}/3rdparty/tinyxml"  "${CMAKE_CURRENT_BINARY_DIR}/tinyxml")
 add_subdirectory ("${SINFONIFRY_ROOT}/utils"  "${CMAKE_CURRENT_BINARY_DIR}/utils")
-add_subdirectory ("${SINFONIFRY_ROOT}/plugin-api"  "${CMAKE_CURRENT_BINARY_DIR}/plugn-api")
+add_subdirectory ("${SINFONIFRY_ROOT}/plugins/api"  "${CMAKE_CURRENT_BINARY_DIR}/plugins/api")
 
 include_directories("/usr/local/include/" 
   "${SINFONIFRY_ROOT}/3rdparty"
   "${SINFONIFRY_ROOT}/utils"
-  "${SINFONIFRY_ROOT}/plugin-api"
+  "${SINFONIFRY_ROOT}/plugins/api"
+  "${SINFONIFRY_ROOT}/inc"
   ${CMAKE_CURRENT_BINARY_DIR}
 )
 

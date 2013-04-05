@@ -316,7 +316,7 @@ int main(int argc, char* argv[])
     try
     {
         std::string inst(instdir);
-        Configuration *conf = new Configuration(inst + "/sinfonifry/core/config/config.xml");
+        Configuration *conf = new Configuration(inst + "/sinfonifry/config/config.xml");
         if(!conf->loaded())
         {
             log_error("Exiting due to lack of configuration");

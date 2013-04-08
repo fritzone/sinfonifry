@@ -33,6 +33,10 @@ if(POSIX)
  
  # The web component can be built
  OPTION(BUILD_SINFONIFRY_WEB "Build the Web Component")
+ 
+ # Should we also install a configuration file?
+ OPTION(INSTALL_CONFIG_FILE "Should we install a default configuration file based on the settings you chose?\nWARNING!!! This will NOT overwrite any older configuration files you have, to save your old setting, instead it will stay in the build (${CMAKE_CURRENT_BINARY_DIR}) directory, merge manually.")
+ 
  # Should we build the posix client?
  if(BUILD_SINFONIFRY_POSIX_CLIENT)
   add_subdirectory(posix-client)
@@ -56,46 +60,44 @@ endif() # POSIX?
 
 set(CONFIG_FILE ${CMAKE_CURRENT_BINARY_DIR}/config.xml)
 
-if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/config.xml)
-  FILE(WRITE  ${CONFIG_FILE} "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
-  FILE(APPEND ${CONFIG_FILE} "<sinfonifry>\n")
-  if(BUILD_SINFONIFRY_ANY_CLIENT)
-    FILE(APPEND ${CONFIG_FILE} " <client>\n")
-    FILE(APPEND ${CONFIG_FILE} " <config core-host=\"${CLIENT_CONFIG_CORE_HOST_IP}\" core-port=\"${CLIENT_CONFIG_CORE_HOST_PORT}\" sleep-time-sec=\"60\"/>\n")
+FILE(WRITE  ${CONFIG_FILE} "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
+FILE(APPEND ${CONFIG_FILE} "<sinfonifry>\n")
+if(BUILD_SINFONIFRY_ANY_CLIENT)
+  FILE(APPEND ${CONFIG_FILE} " <client>\n")
+  FILE(APPEND ${CONFIG_FILE} " <config core-host=\"${CLIENT_CONFIG_CORE_HOST_IP}\" core-port=\"${CLIENT_CONFIG_CORE_HOST_PORT}\" sleep-time-sec=\"60\"/>\n")
+  FILE(APPEND ${CONFIG_FILE} " <plugins>\n")
+
+    ## here a list of the client plugins that were built
+    if(PLUGIN_DISK_STATUS_CLIENT)
+      add_plugin_to_config(${CONFIG_FILE} "disk_status" "1")
+    else()
+      add_plugin_to_config(${CONFIG_FILE} "disk_status" "1")
+    endif()
+
+  FILE(APPEND ${CONFIG_FILE} " </plugins>\n")
+  FILE(APPEND ${CONFIG_FILE} " </client>\n")
+endif() # client
+
+if(POSIX)
+  if(BUILD_SINFONIFRY_CORE)
+    FILE(APPEND ${CONFIG_FILE} " <core>\n")
+    FILE(APPEND ${CONFIG_FILE} " <config bind_to=\"${CORE_CONFIG_BIND_IP}\"
+                                        bind_port=\"${CORE_CONFIG_BIND_PORT}\"
+                                        db_user=\"${CORE_CONFIG_DB_USER}\"
+                                        db_pass=\"${CORE_CONFIG_DB_PASS}\"
+                                        db_host=\"${CORE_CONFIG_DB_HOST_IP}\"
+                                        db_name=\"${CORE_CONFIG_DB}\"
+                                />\n")
     FILE(APPEND ${CONFIG_FILE} " <plugins>\n")
-
-      ## here a list of the client plugins that were built
-      if(PLUGIN_DISK_STATUS_CLIENT)
-        add_plugin_to_config(${CONFIG_FILE} "disk_status" "1")
-      else()
-        add_plugin_to_config(${CONFIG_FILE} "disk_status" "1")
-      endif()
-
+        ## here a list of the core plugins that were built
     FILE(APPEND ${CONFIG_FILE} " </plugins>\n")
-    FILE(APPEND ${CONFIG_FILE} " </client>\n")
-  endif() # client
+    FILE(APPEND ${CONFIG_FILE} " </core>\n")
+  endif() # core
+endif() # POSIX
 
-  if(POSIX)
-    if(BUILD_SINFONIFRY_CORE)
-      FILE(APPEND ${CONFIG_FILE} " <core>\n")
-      FILE(APPEND ${CONFIG_FILE} " <config bind_to=\"${CORE_CONFIG_BIND_IP}\"
-                                          bind_port=\"${CORE_CONFIG_BIND_PORT}\"
-                                          db_user=\"${CORE_CONFIG_DB_USER}\"
-                                          db_pass=\"${CORE_CONFIG_DB_PASS}\"
-                                          db_host=\"${CORE_CONFIG_DB_HOST_IP}\"
-                                          db_name=\"${CORE_CONFIG_DB}\"
-                                  />\n")
-      FILE(APPEND ${CONFIG_FILE} " <plugins>\n")
-          ## here a list of the core plugins that were built
-      FILE(APPEND ${CONFIG_FILE} " </plugins>\n")
-      FILE(APPEND ${CONFIG_FILE} " </core>\n")
-    endif() # core
-  endif() # POSIX
+FILE(APPEND ${CONFIG_FILE} "</sinfonifry>\n")
 
-  FILE(APPEND ${CONFIG_FILE} "</sinfonifry>\n")
-
+if(INSTALL_CONFIG_FILE)
   install(FILES ${CONFIG_FILE} DESTINATION sinfonifry/config)
-else()
-  # Find a way to "patch" the already existing configuration file with the updated plugins
 endif()
 

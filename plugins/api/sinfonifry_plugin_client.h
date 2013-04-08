@@ -13,12 +13,16 @@
 extern "C" {
 #endif
 
-#include "sinfonifry_plugin_base.h"
-#include "sinfonifry_errors.h"
+#include "commons.h"
 
 /*****************************************************************************
  *             Methods that are exposed in a client side plugin              *
  *****************************************************************************/
+
+/**
+ * @defgroup group_plugins_client Client plugins
+ * @{
+ */
 
 /**
  * @brief This is the method which does the real work of the client plugin.
@@ -93,6 +97,10 @@ typedef char* (*P_CLIENT_EXECUTE)(ALLOCATION_BEHAVIOR*);
 /** Function pointer typedef for the @link setup(const char*) @endlink
  *  function */
 typedef const char* (*P_CLIENT_SETUP)(const char*);
+
+/**
+ * @}
+ */
 
 #ifdef __cplusplus
 }

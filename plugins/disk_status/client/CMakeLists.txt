@@ -16,7 +16,7 @@ set (
  CACHE INTERNAL ${PROJECT}_HEADERS
 )
 
-add_library(${PROJECT} SHARED ${${PROJECT}_SOURCES})
+add_library(${PROJECT} MODULE ${${PROJECT}_SOURCES})
 
 target_link_libraries(${PROJECT} blkid ext2fs)
 
@@ -33,3 +33,4 @@ install(TARGETS ${PROJECT} LIBRARY
        DESTINATION sinfonifry/client/plugins
        NAMELINK_SKIP)
   
+         MESSAGE($<TARGET_FILE:tgt>)

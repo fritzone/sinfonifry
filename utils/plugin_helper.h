@@ -2,7 +2,11 @@
 #define PLUGIN_HELPER_H
 
 #include <vector>
+#include <map>
+
 #include "sinfonifry_plugin_client.h"
+#include "sinfonifry_plugin_base.h"
+#include "sinfonifry_signed_plugin.h"
 #include "components.h"
 
 class Configuration;
@@ -11,7 +15,9 @@ namespace sinfonifry
 {
 
 /*
- * Data below is used by the components to identify the plugin structure
+ * Data below is used by the components to identify the plugin structure. This
+ * class is used only if the plugin is signed. Unsigned plugins are executed via
+ * a wrapper.
  */
 
 /**
@@ -28,17 +34,26 @@ struct plugin_descriptor
     // the handle of the library
     void* lib_handle;
 
+    // the pointer to the component() method
     P_COMPONENT f_component;
 
+    // the pointer to the about() method
+    P_ABOUT f_about;
+
+    // the pointer to the name() method
+    P_NAME f_name;
+
+    // the pointer to the signature() method
+    P_SIGNATURE f_signature;
+
+    template <class T> T get_method(const char* mth);
+};
+
+struct signed_plugin : public plugin_descriptor
+{
     P_LOAD f_load;
 
     P_UNLOAD f_unload;
-
-    P_ABOUT f_about;
-
-    P_NAME f_name;
-
-    P_SIGNATURE f_signature;
 };
 
 struct client_plugin_descriptor : public plugin_descriptor
@@ -48,10 +63,58 @@ struct client_plugin_descriptor : public plugin_descriptor
     P_CLIENT_SETUP f_setup;
 };
 
+/**
+ * @brief Simple class for managing the plugins of a running instance
+ */
+class PluginHelper
+{
 
-std::vector<plugin_descriptor*> get_plugins(PLUGIN_COMPONENT,
-                                            const Configuration *conf);
+public:
 
-}
+    static PluginHelper& instance();
+
+    /**
+     * @brief Loads and returns the signed plugins that can be loaded
+     *        for the given component.
+     * @param conf
+     * @param comp
+     * @return
+     */
+    std::vector<plugin_descriptor*> getSignedPlugins(PLUGIN_COMPONENT comp,
+                                                const Configuration *conf, const char *signing_authority);
+
+private:
+
+    PluginHelper();
+
+    /**
+     * @brief Add a forbidden plugin to this session.
+     *
+     * Forbidden plugins will not be loaded in this session anymore since the contain
+     * malformed plugin libraries (ie: missing names, etc...)
+     *
+     * @param name
+     * @param reason
+     */
+    void addForbiddenPlugin(const std::string& name, const std::string& reason);
+
+    /**
+     * @brief Check the signature that is passed in, return true if it is valid
+     */
+    bool checkSignature(const char*, const char *);
+
+    /**
+     * @brief discards the plugin, logs the error.
+     */
+    void discard(plugin_descriptor *&, const char*);
+
+private:
+
+    std::map<std::string, std::string> m_forbiddenPlugins;
+
+    std::vector<plugin_descriptor*> m_signedPlugins;
+};
+
+} // namespace
 
 #endif // PLUGIN_HELPER_H

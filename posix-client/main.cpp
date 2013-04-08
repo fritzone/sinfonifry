@@ -17,6 +17,7 @@ int main(int argc, char* argv[])
 {
     std::string inst(instdir);
     log_init("log.properties");
+    log_info("### Starting as PID " << getpid());
 
     Configuration *conf = new 
                    Configuration(inst + "/sinfonifry/config/config.xml");
@@ -26,14 +27,11 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    std::string core_host = conf->getConfigSetting("client", "core-host",
-                                                  "127.0.0.1");
-    int port = atoi(conf->getConfigSetting("client",
-                                          "core-port", "29888").c_str());
-    int sleep_time = atoi(conf->getConfigSetting("client", "sleep-time-sec",
-                                                "60").c_str());
+    std::string core_host = conf->getConfigSetting("client", "core-host", "127.0.0.1");
+    int port = atoi(conf->getConfigSetting("client", "core-port", "29888").c_str());
+    int sleep_time = atoi(conf->getConfigSetting("client", "sleep-time-sec", "60").c_str());
 
-    std::vector<plugin_descriptor*> plugins = get_plugins(PLUGIN_CLIENT, conf);
+    std::vector<plugin_descriptor*> plugins = PluginHelper::instance().getSignedPlugins(PLUGIN_CLIENT, conf, 0);
     int exception_counter = 1;
     while(1)
     {

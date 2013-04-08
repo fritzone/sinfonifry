@@ -323,7 +323,7 @@ int main(int argc, char* argv[])
             return 1;
         }
 
-        std::vector<plugin_descriptor*> plugins = get_plugins(PLUGIN_CORE, conf);
+        std::vector<plugin_descriptor*> plugins = PluginHelper::instance().getSignedPlugins(PLUGIN_CORE, conf, 0);
 
         std::string ip = conf->getConfigSetting("core", "bind_to", "0.0.0.0");
         int port = atoi(conf->getConfigSetting("core", "bind_port", "29888").c_str());

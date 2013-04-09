@@ -85,20 +85,6 @@ const char* name();
 const char* signature();
 
 /**
- * @brief Return the last error.
- *
- * Returns the last error. For a detailed description of the common error codes
- * together with their meaning please consult the error documentation, otherwise
- * the plugin is responsible for providing error codes that start after the
- * value @c SINFONIFRY_LAST_ERROR .
- *
- * This method is called both for signed and unsigned plugins.
- *
- * @return The last error.
- */
-int last_error();
-
-/**
  * @brief Return the last error text.
  *
  * Returns the last error in a human readable form. The user should not free the
@@ -108,7 +94,7 @@ int last_error();
  *
  * @return The last error.
  */
-const char* last_error_text();
+const char* last_error();
 
 /*****************************************************************************
  *      Typedefs used for the function pointers of all the plugins           *
@@ -125,6 +111,9 @@ typedef const char* (*P_NAME)();
 
 /** Function pointer typedef for the @link signature() @endlink function */
 typedef const char* (*P_SIGNATURE)();
+
+/** Function pointer typedef for the @link last_error() @endlink function */
+typedef const char* (*P_LAST_ERROR)();
 
 /**
  * @}

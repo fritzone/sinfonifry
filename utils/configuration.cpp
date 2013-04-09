@@ -15,6 +15,7 @@ Configuration::Configuration(std::string file) : m_doc(), m_configLoaded(false)
         log_error("Cannot load config file:" << file);
         return;
     }
+    log_info("Opened configuration file:" << file);
     m_configLoaded = true;
 }
 
@@ -96,7 +97,7 @@ vector<string> Configuration::getPlugins(const std::string &component) const
 string Configuration::getConfigSettingForPlugin(const std::string& component,
                                       const std::string& plugin,
                                       const std::string& setting,
-                                      std::string defaultValue)
+                                      std::string defaultValue) const
 {
     if(!m_configLoaded) return defaultValue;
 
@@ -131,15 +132,31 @@ string Configuration::getConfigSettingForPlugin(const std::string& component,
                 // now see if the name is the one we want
                 if(plugin == plugin_name)
                 {
-                    const char* attr = el_plugin->Attribute(setting.c_str());
-                    if(!attr)
+                    const TiXmlElement* el_config = el_plugin->FirstChildElement("config");
+                    if(!el_config)
                     {
-                        log_error("No " << setting << " in the config file"
-                                 << " for plugin " << plugin << ", component"
-                                  << component << ".");
-                        return defaultValue;
+                        log_warn("Misused xml file. No <config> node for the plugin node. Trying the attributes.");
+
+                        const char* attr = el_plugin->Attribute(setting.c_str());
+                        if(!attr)
+                        {
+                            log_error("No " << setting << " in the config file"
+                                      << " for plugin " << plugin << ", component" << component << ".");
+                            return defaultValue;
+                        }
+                        return std::string(attr);
                     }
-                    return std::string(attr);
+                    else
+                    {
+                        const char* attr = el_config->Attribute(setting.c_str());
+                        if(!attr)
+                        {
+                            log_error("No " << setting << " in the config file" << " for plugin "
+                                      << plugin << ", component " << component << ".");
+                            return defaultValue;
+                        }
+                        return std::string(attr);
+                    }
                 }
             }
 

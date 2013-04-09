@@ -55,7 +55,7 @@ public:
     std::string getConfigSettingForPlugin(const std::string& component,
                                           const std::string& plugin,
                                           const std::string& setting,
-                                          std::string defaultValue);
+                                          std::string defaultValue) const;
 
 private:
     TiXmlDocument m_doc;

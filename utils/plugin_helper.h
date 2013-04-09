@@ -46,8 +46,11 @@ struct plugin_descriptor
     // the pointer to the signature() method
     P_SIGNATURE f_signature;
 
-    template <class T> T get_method(const char* mth);
+    // the pointer to the last_erro() method
+    P_LAST_ERROR f_last_error;
 };
+
+template <class T> T get_method(const char* mth, void* lib_handle);
 
 struct signed_plugin : public plugin_descriptor
 {
@@ -83,6 +86,7 @@ public:
     std::vector<plugin_descriptor*> getSignedPlugins(PLUGIN_COMPONENT comp,
                                                 const Configuration *conf, const char *signing_authority);
 
+    bool loadCommonPlugin(const char* signing_authority, plugin_descriptor *&plugin, PLUGIN_COMPONENT comp, std::string comp_name, const Configuration* conf);
 private:
 
     PluginHelper();
@@ -107,6 +111,7 @@ private:
      * @brief discards the plugin, logs the error.
      */
     void discard(plugin_descriptor *&, const char*);
+
 
 private:
 

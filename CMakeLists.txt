@@ -66,12 +66,12 @@ if(BUILD_SINFONIFRY_ANY_CLIENT)
   FILE(APPEND ${CONFIG_FILE} " <client>\n")
   FILE(APPEND ${CONFIG_FILE} " <config core-host=\"${CLIENT_CONFIG_CORE_HOST_IP}\" core-port=\"${CLIENT_CONFIG_CORE_HOST_PORT}\" sleep-time-sec=\"60\"/>\n")
   FILE(APPEND ${CONFIG_FILE} " <plugins>\n")
-
+    
     ## here a list of the client plugins that were built
     if(PLUGIN_DISK_STATUS_CLIENT)
-      add_plugin_to_config(${CONFIG_FILE} "disk_status" "1")
+      add_plugin_to_config(${CONFIG_FILE} "disk_status" "1" "client")
     else()
-      add_plugin_to_config(${CONFIG_FILE} "disk_status" "1")
+      add_plugin_to_config(${CONFIG_FILE} "disk_status" "1" "client")
     endif()
 
   FILE(APPEND ${CONFIG_FILE} " </plugins>\n")

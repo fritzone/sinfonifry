@@ -12,6 +12,8 @@
 
 #include "utils.h"
 #include <sinfonifry_plugin_client.h>
+#include <sinfonifry_plugin_base.h>
+#include <sinfonifry_signed_plugin.h>
 
 #include <cxxtools/log.h>
 
@@ -154,4 +156,14 @@ const char* name()
 const char* setup(const char*)
 {
     return 0;
+}
+
+PLUGIN_COMPONENT component()
+{
+    return PLUGIN_CLIENT;
+}
+
+const char* signature()
+{
+    return "disk_status_una_frog";
 }

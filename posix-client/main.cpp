@@ -48,7 +48,7 @@ int main(int argc, char* argv[])
             client_plugin_descriptor* cpd =
                     static_cast<client_plugin_descriptor*>(pd);
             char* c = cpd->f_execute(&what_to_do);
-            main_xml += c;
+            main_xml += "BLABLA"; // was c
             main_xml += "</plugin>";
             if(what_to_do == FREE_ME)
             {

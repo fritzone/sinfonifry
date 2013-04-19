@@ -22,7 +22,43 @@ using namespace sinfonifry;
 class ClientThread : public cxxtools::DetachedThread
 {
 public:
-  ClientThread(cxxtools::net::iostream* worker, const Configuration* conf) : m_worker(worker), m_conf(conf) {}
+  ClientThread(cxxtools::net::iostream* worker, const Configuration* conf) :
+    m_worker(worker), m_conf(conf) 
+  {}
+  
+private:
+  
+  /* return true if the host which just connected to us is allowed in the DB to connect */
+  bool hostIsAllowed(const std::string& c)
+  {
+      try
+      {
+          tntdb::Connection conn = tntdb::connect(sinfonifry::get_master_connection_string(m_conf));
+
+          std::string query_for_find_host_in_allowed_tables = "select count(*) from sinf01_allowed_hosts where allowed_host_ip = '" + c + "'";
+          tntdb::Result result = conn.select(query_for_find_host_in_allowed_tables);
+          tntdb::Row row = *result.begin();
+          int a = -1;
+          row[0].get(a);  // read column 0 into variable a
+          if(a == 0 || a == -1)
+          {
+              // this host is not enabled
+              log_error("Host is not allowed to connect: " << c);
+              m_worker->close();
+              return false;
+          }
+
+          conn.close();
+      }
+      catch (const std::exception& e)
+      {
+              log_error("Cannot check if the host is allowed to connect or not: " << e.what());
+              m_worker->close();
+              return false;
+      }
+      
+      return true;
+  }
 
 protected:
   void run()
@@ -32,36 +68,19 @@ protected:
     ss << m_worker->rdbuf();
     std::string s =ss.str();
     log_debug(s);
+    std::cout << s << std::endl;
     std::string c = m_worker->getPeerAddr();
 
+    // will be switched to true if the host needs initialization
     bool host_need_initialization = true;
+    
+    // the host ID
     uint32_t host_id = 0;
-
+    
     // first step: see if this client is allowed to connect to us
-    try
+    if(!hostIsAllowed(c))
     {
-        tntdb::Connection conn = tntdb::connect(sinfonifry::get_master_connection_string(m_conf));
-
-        std::string query_for_find_host_in_allowed_tables = "select count(*) from sinf01_allowed_hosts where allowed_host_ip = '" + c + "'";
-        tntdb::Result result = conn.select(query_for_find_host_in_allowed_tables);
-        tntdb::Row row = *result.begin();
-        int a = -1;
-        row[0].get(a);  // read column 0 into variable a
-        if(a == 0 || a == -1)
-        {
-            // this host is not enabled
-            log_error("Host is not allowed to connect: " << c);
-            m_worker->close();
-            return;
-        }
-
-        conn.close();
-    }
-    catch (const std::exception& e)
-    {
-            log_error("Cannot check if the host is allowed to connect or not: " << e.what());
-            m_worker->close();
-            return;
+        return;
     }
 
     try
@@ -137,7 +156,33 @@ protected:
         bool success = doc.FromMemory(s.c_str());
         if(success)
         {
+          
+            // find the plugin_data node
+            TiXmlElement* el_for_plugin_data = doc.FirstChildElement("plugin_data");
+            if(el_for_plugin_data)
+            {
+                // find all the "plugin_name" child nodes
+                TiXmlElement* el_for_plugin_name= el_for_plugin_data->FirstChildElement("plugin");
+                while(el_for_plugin_name)
+                {
+                    // now loop through the plugin entries
+                    std::string plugin_data;
+                    el_for_plugin_name->Print(plugin_data, 1);
+                    std::cout << std::endl << plugin_data << std::endl;
 
+                    el_for_plugin_name = el_for_plugin_name->NextSiblingElement("plugin");
+                }
+
+                std::cout << std::endl << "HERERERE" << std::endl;
+
+                return;
+            }
+            else
+            {
+                log_error("No plugin_data node");
+                return;
+            }
+            
             TiXmlElement* el_for_devices = doc.FirstChildElement("devices");
             if(el_for_devices)
             {
@@ -149,13 +194,6 @@ protected:
                     timestamp_sent = false;
                 }
                 TiXmlElement* el_for_device = el_for_devices->FirstChildElement("device");
-
-                std::stringstream qbr;
-                qbr << "insert into " <<
-                       "sinf01_disk_statistics(disk_stat_disk_id, disk_stat_free_space, disk_stat_measurement_time) " <<
-                       "values( :v1, :v2, to_timestamp(" << timestamp_attr << "))";
-
-                tntdb::Statement prepared_insertion = conn.prepare(qbr.str());
 
                 // first run if the host needs initialization
                 if(host_need_initialization)
@@ -206,6 +244,13 @@ protected:
 
                     }
                 }
+
+                std::stringstream qbr;
+                qbr << "insert into " <<
+                       "sinf01_disk_statistics(disk_stat_disk_id, disk_stat_free_space, disk_stat_measurement_time) " <<
+                       "values( :v1, :v2, to_timestamp(" << timestamp_attr << "))";
+
+                tntdb::Statement prepared_insertion = conn.prepare(qbr.str());
 
                 // second run: to actually insert the data in the statistic table and do the calculations based on the data we get
                 int smallestPercentage = 100;

@@ -846,7 +846,71 @@ void TiXmlElement::Print( FILE* cfile, int depth ) const
 			fprintf( cfile, "    " );
 		}
 		fprintf( cfile, "</%s>", value.c_str() );
-	}
+    }
+}
+
+void TiXmlElement::Print(std::string &target, int depth) const
+{
+    int i;
+    for ( i=0; i<depth; i++ ) {
+        target += "    ";
+    }
+
+    std::stringstream ss;
+    ss << "<" << value.c_str();
+    target += ss.str();
+
+    const TiXmlAttribute* attrib;
+    for ( attrib = attributeSet.First(); attrib; attrib = attrib->Next() )
+    {
+        target += " ";
+        std::string temp;
+        attrib->Print( temp, depth );
+        target += temp;
+    }
+
+    // There are 3 different formatting approaches:
+    // 1) An element without children is printed as a <foo /> node
+    // 2) An element with only a text child is printed as <foo> text </foo>
+    // 3) An element with children is printed on multiple lines.
+    TiXmlNode* node;
+    if ( !firstChild )
+    {
+        target += " />" ;
+    }
+    else if ( firstChild == lastChild && firstChild->ToText() )
+    {
+        target += ">";
+        std::string temp;
+        firstChild->Print( temp, depth + 1 );
+        target += temp;
+        target += "<";
+        target += value.c_str();
+        target += ">";
+    }
+    else
+    {
+        target += ">";
+
+        for ( node = firstChild; node; node=node->NextSibling() )
+        {
+            if ( !node->ToText() )
+            {
+                target += "\n";
+            }
+            std::string temp;
+            node->Print( temp, depth+1 );
+            target += temp;
+        }
+        target += "\n";
+        for( i=0; i<depth; ++i )
+        {
+            target += "    ";
+        }
+        target += "<";
+        target += value.c_str();
+        target += ">";
+    }
 }
 
 
@@ -1169,6 +1233,18 @@ void TiXmlDocument::Print( FILE* cfile, int depth ) const
 	}
 }
 
+void TiXmlDocument::Print( std::string& target, int depth ) const
+{
+
+    for ( const TiXmlNode* node=FirstChild(); node; node=node->NextSibling() )
+    {
+        std::string temp;
+        node->Print( temp, depth );
+        temp += "\n";
+        target += temp;
+    }
+}
+
 
 bool TiXmlDocument::Accept( TiXmlVisitor* visitor ) const
 {
@@ -1249,6 +1325,29 @@ void TiXmlAttribute::Print( FILE* cfile, int /*depth*/, TIXML_STRING* str ) cons
 	}
 }
 
+void TiXmlAttribute::Print( std::string& target, int /*depth*/) const
+{
+    TIXML_STRING n, v;
+
+    EncodeString( name, &n );
+    EncodeString( value, &v );
+
+    if (value.find ('\"') == TIXML_STRING::npos)
+    {
+        {
+            std::stringstream ss;
+            ss << n.c_str() << "=\"" <<v.c_str() <<"\"";
+            target += ss.str();
+        }
+    }
+    else
+    {
+        {
+            std::stringstream ss;
+            ss << n.c_str() << "='" << v.c_str() << "'";
+        }
+    }
+}
 
 int TiXmlAttribute::QueryIntValue( int* ival ) const
 {
@@ -1321,6 +1420,17 @@ void TiXmlComment::Print( FILE* cfile, int depth ) const
 	fprintf( cfile, "<!--%s-->", value.c_str() );
 }
 
+void TiXmlComment::Print( std::string& target, int depth ) const
+{
+
+    for ( int i=0; i<depth; i++ )
+    {
+        target += "    " ;
+    }
+    target += "<!--";
+    target += value.c_str();
+    target += "-->";
+}
 
 void TiXmlComment::CopyTo( TiXmlComment* target ) const
 {
@@ -1364,6 +1474,26 @@ void TiXmlText::Print( FILE* cfile, int depth ) const
 		EncodeString( value, &buffer );
 		fprintf( cfile, "%s", buffer.c_str() );
 	}
+}
+
+void TiXmlText::Print(std::string& target, int depth ) const
+{
+    if ( cdata )
+    {
+        int i;
+        target += "\n";
+        for ( i=0; i<depth; i++ )
+        {
+            target += "    " ;
+        }
+        target += std::string("<![CDATA[") + value.c_str() + "]]>\n";
+    }
+    else
+    {
+        TIXML_STRING buffer;
+        EncodeString( value, &buffer );
+        target += buffer.c_str() ;
+    }
 }
 
 
@@ -1453,6 +1583,23 @@ void TiXmlDeclaration::Print( FILE* cfile, int /*depth*/, TIXML_STRING* str ) co
 	if ( str )	 (*str) += "?>";
 }
 
+void TiXmlDeclaration::Print( std::string& target, int /*depth*/) const
+{
+    target += "<?xml ";
+
+    if ( !version.empty() )
+    {
+        target += "version=\""; target += version; target += "\" ";
+    }
+    if ( !encoding.empty() ) {
+        target += "encoding=\""; target += encoding; target += "\" ";
+    }
+    if ( !standalone.empty() ) {
+        target += "standalone=\""; target += standalone; target += "\" ";
+    }
+    target += "?>";
+}
+
 
 void TiXmlDeclaration::CopyTo( TiXmlDeclaration* target ) const
 {
@@ -1489,6 +1636,12 @@ void TiXmlUnknown::Print( FILE* cfile, int depth ) const
 	fprintf( cfile, "<%s>", value.c_str() );
 }
 
+void TiXmlUnknown::Print( std::string& target, int depth ) const
+{
+    for ( int i=0; i<depth; i++ )
+        target += "    " ;
+    target += std::string("<") + value.c_str()+ ">";
+}
 
 void TiXmlUnknown::CopyTo( TiXmlUnknown* target ) const
 {

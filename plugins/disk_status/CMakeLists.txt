@@ -4,3 +4,7 @@ OPTION(PLUGIN_DISK_STATUS_CORE "Build Disk Status plugin extension for the core"
 if(PLUGIN_DISK_STATUS_CLIENT)
   add_subdirectory(client)
 endif()  
+
+if(PLUGIN_DISK_STATUS_CORE)
+  add_subdirectory(core)
+endif()  

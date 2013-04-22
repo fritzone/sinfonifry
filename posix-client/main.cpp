@@ -38,27 +38,18 @@ int main(int argc, char* argv[])
 
         std::string main_xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
                 "<plugin_data>";
+
         for(int i=0; i<plugins.size(); i++)
         {
             main_xml += "<plugin name=\"";
             main_xml += plugins[i]->name;
             main_xml += "\">";
-            ALLOCATION_BEHAVIOR what_to_do = DO_NOT_FREE_ME;
-            plugin_descriptor* pd = plugins[i];
-            client_plugin_descriptor* cpd =
-                    static_cast<client_plugin_descriptor*>(pd);
-            char* c = cpd->f_execute(&what_to_do);
-            main_xml += "BLABLA"; // was c
+
+            std::string encoded_plugin_result = PluginHelper::instance().executeClientPlugin(plugins[i]);
+
+            main_xml += encoded_plugin_result;
             main_xml += "</plugin>";
-            if(what_to_do == FREE_ME)
-            {
-                free(c);
-            }
-            else
-            if(what_to_do == DELETE_ME)
-            {
-                delete [] c;
-            }
+
         }
         main_xml += "</plugin_data>";
 

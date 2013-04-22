@@ -27,12 +27,13 @@ extern "C" {
  * the @c data since it is managed by the caller.
  * 
  * @param data The data that was gathered by the client side plugin.
+ * @param host_ip Thos Host IP
  * 
  * @return 0 in case of error, then the @c last_error() is called, 
  * there will be an entry in the log. Any other value is ignored by the 
  * caller, thus considered to be a succesfull completion.
  */
-int data_received(const char* data);
+int data_received(const char* host_ip, const char* data);
 
 /**
  * @brief Called if the plugin needs to initialize internal data for the host.

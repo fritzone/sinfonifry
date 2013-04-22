@@ -4,6 +4,7 @@
 #include "utils.h"
 #include "instdir.h"
 #include <cxxtools/log.h>
+#include <libb64/b64.h>
 
 #include <dlfcn.h>
 
@@ -237,4 +238,34 @@ std::vector<plugin_descriptor*> PluginHelper::getSignedPlugins(PLUGIN_COMPONENT 
     }
     return plugins;
 }
+
+std::string PluginHelper::executeClientPlugin(plugin_descriptor* pd)
+{
+    // check if this is an internal signed plugin or not
+    ALLOCATION_BEHAVIOR what_to_do = DO_NOT_FREE_ME;
+    client_plugin_descriptor* cpd = static_cast<client_plugin_descriptor*>(pd);
+
+    unsigned int ret_len = 0;
+    char* c = cpd->f_execute(&what_to_do, &ret_len);
+    if(ret_len == 0)
+    {
+        ret_len = strlen(c);
+    }
+
+    std::string s = base64_encode((const unsigned char *)c, ret_len);
+
+    if(what_to_do == FREE_ME)
+    {
+        free(c);
+    }
+    else
+    if(what_to_do == DELETE_ME)
+    {
+        delete [] c;
+    }
+
+    return s;
 }
+
+}
+

@@ -17,7 +17,7 @@
 
 #include <cxxtools/log.h>
 
-log_define("sinfonifry.client.linux.plugin.disk_stat")
+log_define("sinfonifry.client.linux.plugin.disk_status")
 
 static const int port = 29888;
 
@@ -120,11 +120,12 @@ std::string gather_disk_stat()
 
 
 // called when the plugin container needs data. Caller needs to free the data
-char* execute(ALLOCATION_BEHAVIOR *free_returned_value)
+char* execute(ALLOCATION_BEHAVIOR *free_returned_value, int* length)
 {
     std::string s = gather_disk_stat();
     char* c = (char*)calloc(s.length() + 1, sizeof(char));
     strncpy(c, s.c_str(), s.length());
+    *length = s.length();
     *free_returned_value = FREE_ME;
     return c;
 }

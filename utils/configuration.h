@@ -19,6 +19,8 @@ public:
      */
     Configuration(std::string file);
 
+    static Configuration& defaultConfiguration();
+
     /**
      * @brief Returns the value of the given setting for the specified component
      * @param component - the component for which we require the setting

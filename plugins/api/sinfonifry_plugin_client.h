@@ -49,13 +49,18 @@ extern "C" {
  *   @li @c DELETE_ME - free the allocated memory with @c delete [] .
  * For a detailed description of these value see @link ALLOCATION_BEHAVIOR
  * @endlink
+ * @param [out] length will contain the length of the returned string. This
+ * is especially useful if you return binary data which might contain the
+ * '\0' character. If this value is 0 the \c strlen() function is used to
+ * determine the length of the returned value.
+ *
  *
  * @return The gathered data formatted for the core side component. If this
  *                  returns @c NULL or empty string it is ignored by the caller.
  *
  * @see @c ALLOCATION_BEHAVIOR for a detailed description of the values
  */
-char* execute(ALLOCATION_BEHAVIOR* free_returned_value);
+char* execute(ALLOCATION_BEHAVIOR* free_returned_value, unsigned int* length);
 
 /**
  * @brief This function provides internal setup functionality for the plugin.
@@ -92,7 +97,7 @@ const char* setup(const char* commands);
 
 /** Function pointer typedef for the @link execute(ALLOCATION_BEHAVIOR*)
  *  @endlink function. */
-typedef char* (*P_CLIENT_EXECUTE)(ALLOCATION_BEHAVIOR*);
+typedef char* (*P_CLIENT_EXECUTE)(ALLOCATION_BEHAVIOR*, unsigned int*);
 
 /** Function pointer typedef for the @link setup(const char*) @endlink
  *  function */

@@ -1,5 +1,6 @@
 #include "configuration.h"
 #include <cxxtools/log.h>
+#include <instdir.h>
 
 #include <iostream>
 
@@ -17,6 +18,13 @@ Configuration::Configuration(std::string file) : m_doc(), m_configLoaded(false)
     }
     log_info("Opened configuration file:" << file);
     m_configLoaded = true;
+}
+
+Configuration& Configuration::defaultConfiguration()
+{
+    std::string inst(instdir);
+    static Configuration defaultConfig(inst);
+    return defaultConfig;
 }
 
 std::string Configuration::getConfigSetting(const std::string& component,

@@ -86,7 +86,24 @@ public:
     std::vector<plugin_descriptor*> getSignedPlugins(PLUGIN_COMPONENT comp,
                                                 const Configuration *conf, const char *signing_authority);
 
+    /**
+     * @brief loadCommonPlugin
+     * @param signing_authority
+     * @param plugin
+     * @param comp
+     * @param comp_name
+     * @param conf
+     * @return
+     */
     bool loadCommonPlugin(const char* signing_authority, plugin_descriptor *&plugin, PLUGIN_COMPONENT comp, std::string comp_name, const Configuration* conf);
+
+    /**
+     * @brief executeClientPlugin
+     * @param plugin_name
+     * @return
+     */
+    std::string executeClientPlugin(plugin_descriptor *pd);
+
 private:
 
     PluginHelper();

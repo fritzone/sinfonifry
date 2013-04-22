@@ -27,11 +27,14 @@ SET(CORE_CONFIG_DB_PASS "s1nf0n1fry" CACHE STRING "s1nf0n1fry")
 SET(CORE_CONFIG_DB "sinfonifry" CACHE STRING "sinfonifry")
 
 add_subdirectory ("${SINFONIFRY_ROOT}/3rdparty/tinyxml"  "${CMAKE_CURRENT_BINARY_DIR}/tinyxml")
+add_subdirectory ("${SINFONIFRY_ROOT}/3rdparty/libb64"  "${CMAKE_CURRENT_BINARY_DIR}/libb64")
+
 add_subdirectory ("${SINFONIFRY_ROOT}/utils"  "${CMAKE_CURRENT_BINARY_DIR}/utils")
 add_subdirectory ("${SINFONIFRY_ROOT}/plugins/api"  "${CMAKE_CURRENT_BINARY_DIR}/plugins/api")
 
 include_directories("/usr/local/include/" 
   "${SINFONIFRY_ROOT}/3rdparty"
+  "${SINFONIFRY_ROOT}/3rdparty/libb64"
   "${SINFONIFRY_ROOT}/utils"
   "${SINFONIFRY_ROOT}/plugins/api"
   "${SINFONIFRY_ROOT}/inc"

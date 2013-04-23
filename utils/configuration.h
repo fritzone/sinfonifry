@@ -17,7 +17,7 @@ public:
      * @brief Configuration constructor
      * @param file - the configuration file
      */
-    Configuration(std::string file);
+    Configuration(const std::string &file);
 
     static Configuration& defaultConfiguration();
 

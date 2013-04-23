@@ -14,7 +14,7 @@ namespace sinfonifry
  * connect in order to perform basic database functionality. This must not be
  * the same database where the plugins will connect.
  */
-std::string get_master_connection_string(const Configuration* conf);
+std::string get_master_connection_string(const Configuration &conf);
 
 }
 

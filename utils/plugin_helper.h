@@ -5,6 +5,7 @@
 #include <map>
 
 #include "sinfonifry_plugin_client.h"
+#include "sinfonifry_plugin_core.h"
 #include "sinfonifry_plugin_base.h"
 #include "sinfonifry_signed_plugin.h"
 #include "components.h"
@@ -66,6 +67,13 @@ struct client_plugin_descriptor : public plugin_descriptor
     P_CLIENT_SETUP f_setup;
 };
 
+struct core_plugin_descriptor : public plugin_descriptor
+{
+    P_CORE_INITIALIZE_HOST_DATA f_initalize_host_data;
+
+    P_CORE_DATA_RECEIVED f_data_received;
+};
+
 /**
  * @brief Simple class for managing the plugins of a running instance
  */
@@ -76,26 +84,7 @@ public:
 
     static PluginHelper& instance();
 
-    /**
-     * @brief Loads and returns the signed plugins that can be loaded
-     *        for the given component.
-     * @param conf
-     * @param comp
-     * @return
-     */
-    std::vector<plugin_descriptor*> getSignedPlugins(PLUGIN_COMPONENT comp,
-                                                const Configuration *conf, const char *signing_authority);
-
-    /**
-     * @brief loadCommonPlugin
-     * @param signing_authority
-     * @param plugin
-     * @param comp
-     * @param comp_name
-     * @param conf
-     * @return
-     */
-    bool loadCommonPlugin(const char* signing_authority, plugin_descriptor *&plugin, PLUGIN_COMPONENT comp, std::string comp_name, const Configuration* conf);
+    static void initialize(PLUGIN_COMPONENT comp, const Configuration& conf);
 
     /**
      * @brief executeClientPlugin
@@ -103,6 +92,30 @@ public:
      * @return
      */
     std::string executeClientPlugin(plugin_descriptor *pd);
+
+    /**
+     * @brief initializeDataForPlugins calls the initialize for all the core plugins with the given data
+     * @param ip
+     * @param data
+     */
+    void callInitializeDataForCorePlugins(const char* ip, const char* data, const char *plugin_name);
+
+    /**
+     * @brief callDataReceviedForCorePlugins
+     * @param ip
+     * @param data
+     * @param plugin_name
+     */
+    void callDataReceviedForCorePlugins(const char* ip, const char* data, const char *plugin_name);
+
+    /**
+     * @brief getSignedPlugins returns all the signed plugins
+     * @return
+     */
+    const std::vector<plugin_descriptor*>& getSignedPlugins()
+    {
+        return m_signedPlugins;
+    }
 
 private:
 
@@ -130,11 +143,37 @@ private:
     void discard(plugin_descriptor *&, const char*);
 
 
+    /**
+     * @brief Loads and returns the signed plugins that can be loaded
+     *        for the given component. (internal function)
+     * @param conf
+     * @param comp
+     * @return
+     */
+    std::vector<plugin_descriptor*> int_getSignedPlugins(PLUGIN_COMPONENT comp,
+                                                const Configuration *conf, const char *signing_authority);
+
+    /**
+     * @brief loadCommonPlugin
+     * @param signing_authority
+     * @param plugin
+     * @param comp
+     * @param comp_name
+     * @param conf
+     * @return
+     */
+    bool loadCommonPlugin(const char* signing_authority, plugin_descriptor *&plugin, PLUGIN_COMPONENT comp, std::string comp_name, const Configuration* conf);
+
 private:
 
     std::map<std::string, std::string> m_forbiddenPlugins;
 
     std::vector<plugin_descriptor*> m_signedPlugins;
+
+
+private:
+
+    static const Configuration& s_conf;
 };
 
 } // namespace

@@ -71,7 +71,19 @@ int data_received(const char* host_ip, const char* data);
  * @return 0 in case of error, in this case the @c last_error() method will be
  * called and a log entry will be created. Any other value is ignored.
  */
-int initialize_host(const char* host_ip, const char* data);
+int initialize_host_data(const char* host_ip, const char* data);
+
+/*****************************************************************************
+ *      Typedefs used for the function pointers of core plugins              *
+ *****************************************************************************/
+
+/** Function pointer typedef for the @link initialize_host_data()
+ *  @endlink function. */
+typedef int (*P_CORE_INITIALIZE_HOST_DATA)(const char*, const char*);
+
+/** Function pointer typedef for the @link data_received() @endlink
+ *  function */
+typedef int (*P_CORE_DATA_RECEIVED)(const char*, const char*);
 
 #ifdef __cplusplus
 }

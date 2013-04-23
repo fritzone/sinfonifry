@@ -24,6 +24,36 @@ extern "C" {
  * @{
  */
 
+
+/**
+ * @brief This function provides internal setup functionality for the plugin.
+ *
+ *
+ * Implement this as per your requirements of the interpretation of the
+ * commands. Return any value you consider relevant to be passed on to the
+ * caller, ie. the web-side correspondent plugin.
+ *
+ * The typical workflow for this functionality is:
+ *
+ * -# In the web gui the user selects the host, and there it sees
+ *   the plugins the client component of that host has.
+ * -# The web gui provides a list of the plugin specific options
+ *   the user can choose from (such as for the disk status
+ *   plugin: do not scan this hard drive for a speicifc hard
+ *   disk) and the user chooses the option
+ * -# The web-gui renders the user selected option into a
+ *   command string (such as: DO_NOT_SCAN /dev/sdb1)
+ * -# This command is sent to the client side of the
+ *   plugin triumvirate and this setup() method takes care of
+ *   the action.
+ *
+ * The setup method should not free the commands' parameter.
+ *
+ * @return any value you consider to be useful and which can be handled by the
+ *         web gui.
+ */
+const char* setup(const char* commands);
+
 /**
  * @brief This is the method which does the real work of the client plugin.
  *
@@ -60,36 +90,8 @@ extern "C" {
  *
  * @see @c ALLOCATION_BEHAVIOR for a detailed description of the values
  */
-char* execute(ALLOCATION_BEHAVIOR* free_returned_value, unsigned int* length);
 
-/**
- * @brief This function provides internal setup functionality for the plugin.
- *
- *
- * Implement this as per your requirements of the interpretation of the
- * commands. Return any value you consider relevant to be passed on to the
- * caller, ie. the web-side correspondent plugin.
- *
- * The typical workflow for this functionality is:
- *
- * -# In the web gui the user selects the host, and there it sees
- *   the plugins the client component of that host has.
- * -# The web gui provides a list of the plugin specific options
- *   the user can choose from (such as for the disk status
- *   plugin: do not scan this hard drive for a speicifc hard
- *   disk) and the user chooses the option
- * -# The web-gui renders the user selected option into a
- *   command string (such as: DO_NOT_SCAN /dev/sdb1)
- * -# This command is sent to the client side of the
- *   plugin triumvirate and this setup() method takes care of
- *   the action.
- * 
- * The setup method should not free the commands' parameter.
- *
- * @return any value you consider to be useful and which can be handled by the
- *         web gui.
- */
-const char* setup(const char* commands);
+char* execute(ALLOCATION_BEHAVIOR* free_returned_value, unsigned int* length);
 
 /*****************************************************************************
  *      Typedefs used for the function pointers of client plugins            *

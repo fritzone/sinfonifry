@@ -4,9 +4,13 @@
 #include "db_utils.h"
 #include <cxxtools/loginit.h>
 
+#include <sinfonifry_plugin_core.h>
+#include <sinfonifry_plugin_base.h>
+#include <sinfonifry_signed_plugin.h>
+
 log_define("sinfonifry.core.plugin.disk_status")
 
-int initialize_host(const char* host_ip, const char* data)
+int initialize_host_data(const char* host_ip, const char* data)
 {
     TiXmlDocument doc;
     bool success = doc.FromMemory(data);
@@ -15,7 +19,7 @@ int initialize_host(const char* host_ip, const char* data)
         // the host ID
         uint32_t host_id = 0;
         Configuration conf = Configuration::defaultConfiguration();
-        tntdb::Connection conn = tntdb::connect(sinfonifry::get_master_connection_string(&conf));
+        tntdb::Connection conn = tntdb::connect(sinfonifry::get_master_connection_string(conf));
 
         std::string query_for_find_host_id = std::string("select host_id from sinf01_host where host_ip = '") + host_ip + "'";
         tntdb::Result result = conn.select(query_for_find_host_id);
@@ -96,7 +100,7 @@ int data_received(const char* host_ip, const char* data)
         // the host ID
         uint32_t host_id = 0;
         Configuration conf = Configuration::defaultConfiguration();
-        tntdb::Connection conn = tntdb::connect(sinfonifry::get_master_connection_string(&conf));
+        tntdb::Connection conn = tntdb::connect(sinfonifry::get_master_connection_string(conf));
 
         std::string query_for_find_host_id = std::string("select host_id from sinf01_host where host_ip = '") + host_ip + "'";
         tntdb::Result result = conn.select(query_for_find_host_id);
@@ -106,12 +110,7 @@ int data_received(const char* host_ip, const char* data)
             row[0].get(host_id);
         }
 
-
-
-
-
         TiXmlElement* el_for_devices = doc.FirstChildElement("devices");
-
 
         bool timestamp_sent = true;
         const char* timestamp_attr = el_for_devices->Attribute("timestamp");
@@ -216,4 +215,38 @@ int data_received(const char* host_ip, const char* data)
 
 
     return 1;
+}
+
+
+// called upon loading the plugin. Internal initialization can be done
+PLUGIN_LOAD_STATUS load()
+{
+    return PLUGIN_LOADED;
+}
+
+// called when the system goes down.
+void unload()
+{
+}
+
+// an internal about string. User should NOT free the data returned from here
+const char* about()
+{
+    return "disk_status plugin 0.1 for sinfonifry. (c) 2012 The UnaFrog project";
+}
+
+// the name of the plugin. User should NOT free this
+const char* name()
+{
+    return "disk_status";
+}
+
+PLUGIN_COMPONENT component()
+{
+    return PLUGIN_CORE;
+}
+
+const char* signature()
+{
+    return "disk_status_una_frog";
 }

@@ -8,13 +8,15 @@ log_define("sinfonifry.util.configuration")
 
 using namespace std;
 
-Configuration::Configuration(std::string file) : m_doc(), m_configLoaded(false)
+Configuration::Configuration(const std::string& file) : m_doc(), m_configLoaded(false)
 {
     m_doc.LoadFile(file.c_str());
     if(m_doc.Error())
     {
-        log_error("Cannot load config file:" << file);
-        return;
+        std::stringstream ss;
+        ss << "Cannot load/parse config file:" << file << ". Reason: " << m_doc.ErrorDesc();
+        log_error(ss.str());
+        throw ss.str();
     }
     log_info("Opened configuration file:" << file);
     m_configLoaded = true;
@@ -22,7 +24,8 @@ Configuration::Configuration(std::string file) : m_doc(), m_configLoaded(false)
 
 Configuration& Configuration::defaultConfiguration()
 {
-    std::string inst(instdir);
+    static std::string inst(instdir);
+    inst += "/sinfonifry/config/config.xml";
     static Configuration defaultConfig(inst);
     return defaultConfig;
 }

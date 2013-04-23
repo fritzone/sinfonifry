@@ -11,15 +11,15 @@
 #include <ctime>
 
 #include "utils.h"
+
+#include <cxxtools/log.h>
+
 #include <sinfonifry_plugin_client.h>
 #include <sinfonifry_plugin_base.h>
 #include <sinfonifry_signed_plugin.h>
 
-#include <cxxtools/log.h>
 
 log_define("sinfonifry.client.linux.plugin.disk_status")
-
-static const int port = 29888;
 
 static void pretty_print_line(const char *device, const char *fs_type,
                               const char *label, const char *mtpt,
@@ -118,9 +118,8 @@ std::string gather_disk_stat()
     return s;
 }
 
-
 // called when the plugin container needs data. Caller needs to free the data
-char* execute(ALLOCATION_BEHAVIOR *free_returned_value, int* length)
+char* execute(ALLOCATION_BEHAVIOR *free_returned_value, unsigned int* length)
 {
     std::string s = gather_disk_stat();
     char* c = (char*)calloc(s.length() + 1, sizeof(char));
@@ -137,7 +136,7 @@ PLUGIN_LOAD_STATUS load()
 }
 
 // called when the system goes down.
-void unload()
+PLUGIN_UNLOAD_STATUS unload(PLUGIN_UNLOAD_REQUEST reason)
 {
 }
 

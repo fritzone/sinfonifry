@@ -8,11 +8,13 @@ project (${PROJECT})
 
 set(${PROJECT}_SOURCES 
  sinfonifry_core.cpp 
+ ClientThread.cpp
  CACHE INTERNAL ${PROJECT}_SOURCES
 )
 
 set (
- ${PROJECT}_HEADERS "" 
+ ${PROJECT}_HEADERS
+ ClientThread.h
  CACHE INTERNAL ${PROJECT}_HEADERS  
 )
 

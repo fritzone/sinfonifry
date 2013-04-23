@@ -47,6 +47,11 @@ if(POSIX)
  if(BUILD_SINFONIFRY_CORE)
   add_subdirectory(core)
  endif()
+ 
+ # should we build the web component?
+ if(BUILD_SINFONIFRY_WEB)
+   add_subdirectory(web)
+ endif()
 
  # by default add the utils subdirectory
  add_subdirectory(utils)
@@ -79,15 +84,12 @@ endif() # client
 if(POSIX)
   if(BUILD_SINFONIFRY_CORE)
     FILE(APPEND ${CONFIG_FILE} " <core>\n")
-    FILE(APPEND ${CONFIG_FILE} " <config bind_to=\"${CORE_CONFIG_BIND_IP}\"
-                                        bind_port=\"${CORE_CONFIG_BIND_PORT}\"
-                                        db_user=\"${CORE_CONFIG_DB_USER}\"
-                                        db_pass=\"${CORE_CONFIG_DB_PASS}\"
-                                        db_host=\"${CORE_CONFIG_DB_HOST_IP}\"
-                                        db_name=\"${CORE_CONFIG_DB}\"
-                                />\n")
+    FILE(APPEND ${CONFIG_FILE} " <config bind_to=\"${CORE_CONFIG_BIND_IP}\" bind_port=\"${CORE_CONFIG_BIND_PORT}\" db_user=\"${CORE_CONFIG_DB_USER}\" db_pass=\"${CORE_CONFIG_DB_PASS}\" db_host=\"${CORE_CONFIG_DB_HOST_IP}\" db_name=\"${CORE_CONFIG_DB}\" />\n")
     FILE(APPEND ${CONFIG_FILE} " <plugins>\n")
         ## here a list of the core plugins that were built
+        if(PLUGIN_DISK_STATUS_CORE)
+          add_plugin_to_config(${CONFIG_FILE} "disk_status" "1" "core")
+        endif()
     FILE(APPEND ${CONFIG_FILE} " </plugins>\n")
     FILE(APPEND ${CONFIG_FILE} " </core>\n")
   endif() # core

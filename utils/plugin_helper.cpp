@@ -37,8 +37,9 @@ void PluginHelper::discard(plugin_descriptor*& plugin, const char *msg)
     free(plugin);
 }
 
-PluginHelper::PluginHelper() : m_forbiddenPlugins()
-{}
+PluginHelper::PluginHelper() : m_forbiddenPlugins(), m_signedPlugins()
+{
+}
 
 void PluginHelper::addForbiddenPlugin(const std::string &name, const std::string &reason)
 {
@@ -55,6 +56,11 @@ PluginHelper& PluginHelper::instance()
 {
     static PluginHelper t_instance;
     return t_instance;
+}
+
+void PluginHelper::initialize(PLUGIN_COMPONENT comp, const Configuration &conf)
+{
+    PluginHelper::instance().m_signedPlugins = PluginHelper::instance().int_getSignedPlugins(comp, &conf, "");
 }
 
 bool PluginHelper::loadCommonPlugin(const char* signing_authority, plugin_descriptor*& plugin, PLUGIN_COMPONENT comp, std::string comp_name, const Configuration* conf)
@@ -160,7 +166,7 @@ bool PluginHelper::loadCommonPlugin(const char* signing_authority, plugin_descri
     return true;
 }
 
-std::vector<plugin_descriptor*> PluginHelper::getSignedPlugins(PLUGIN_COMPONENT comp, const Configuration* conf, const char* signing_authority)
+std::vector<plugin_descriptor*> PluginHelper::int_getSignedPlugins(PLUGIN_COMPONENT comp, const Configuration* conf, const char* signing_authority)
 {
     std::string comp_name = sinfonifry::component_name_from_component_code(comp);
     std::vector<std::string> plugin_names = conf->getPlugins(comp_name);
@@ -227,6 +233,27 @@ std::vector<plugin_descriptor*> PluginHelper::getSignedPlugins(PLUGIN_COMPONENT 
             static_cast<client_plugin_descriptor*>(plugin)->f_setup = setupmth;
         }
 
+        if(comp == PLUGIN_CORE)
+        {
+            // data received method
+            P_CORE_DATA_RECEIVED data_recv = get_method<P_CORE_DATA_RECEIVED>("data_received", lib_handle);
+            if (data_recv == 0)
+            {
+                discard(plugin, "no data_recevied() method for a core plugin");
+                continue;
+            }
+            static_cast<core_plugin_descriptor*>(plugin)->f_data_received = data_recv;
+
+            // initialize method
+            P_CORE_INITIALIZE_HOST_DATA init_host_mth= get_method<P_CORE_INITIALIZE_HOST_DATA>("initialize_host_data", lib_handle);
+            if (init_host_mth == 0)
+            {
+                discard(plugin, "no initialize_host_data() method for a core plugin");
+                continue;
+            }
+            static_cast<core_plugin_descriptor*>(plugin)->f_initalize_host_data= init_host_mth;
+        }
+
         // we are here, this plugin seems to be a happy one regarding signage
 
         //check the load() method
@@ -267,5 +294,54 @@ std::string PluginHelper::executeClientPlugin(plugin_descriptor* pd)
     return s;
 }
 
+void PluginHelper::callInitializeDataForCorePlugins(const char* ip, const char* data, const char* plugin_name)
+{
+    // first run: call initialize of the signed plugins. They are already loaded for the component
+    std::vector<plugin_descriptor*> signed_plugins = getSignedPlugins();
+    for(int i=0; i<signed_plugins.size(); i++)
+    {
+        if(!strcmp(signed_plugins[i]->name, plugin_name) )
+        {
+            core_plugin_descriptor* core_pd = static_cast<core_plugin_descriptor*>(signed_plugins[i]);
+            if(core_pd->f_initalize_host_data)
+            {
+                core_pd->f_initalize_host_data(ip, data);
+            }
+            else
+            {
+                log_error( "regardless of the rigurous check the " << plugin_name << " plugin has no init method");
+                return;
+            }
+        }
+    }
+
+    // next run: the unsigned plugins
 }
+
+void PluginHelper::callDataReceviedForCorePlugins(const char* ip, const char* data, const char *plugin_name)
+{
+    // first run: call initialize of the signed plugins. They are already loaded for the component
+    std::vector<plugin_descriptor*> signed_plugins = getSignedPlugins();
+    for(int i=0; i<signed_plugins.size(); i++)
+    {
+        if(!strcmp(signed_plugins[i]->name, plugin_name) )
+        {
+            core_plugin_descriptor* core_pd = static_cast<core_plugin_descriptor*>(signed_plugins[i]);
+            if(core_pd->f_data_received)
+            {
+                core_pd->f_data_received(ip, data);
+            }
+            else
+            {
+                log_error( "regardless of the rigurous check the " << plugin_name << " plugin has no data_recevied method");
+                return;
+            }
+        }
+    }
+
+    // next run: the unsigned plugins
+}
+
+} // namespace
+
 

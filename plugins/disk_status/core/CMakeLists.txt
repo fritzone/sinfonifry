@@ -22,10 +22,14 @@ include_directories(
   "/usr/local/include/"
   "${SINFONIFRY_ROOT}/3rdparty"
   "${SINFONIFRY_ROOT}/utils"
-  "${SINFONIFRY_ROOT}/plugin-api"
+  "${SINFONIFRY_ROOT}/plugins/api"
+  "${SINFONIFRY_ROOT}/inc"
   ${CMAKE_CURRENT_BINARY_DIR}
 )
 
 install(TARGETS ${PROJECT} LIBRARY
        DESTINATION sinfonifry/core/plugins
        NAMELINK_SKIP)
+
+get_property(${PROJECT}_location_t TARGET ${PROJECT} PROPERTY LOCATION)
+set(${PROJECT}_location ${${PROJECT}_location_t} CACHE INTERNAL ${PROJECT}_location)

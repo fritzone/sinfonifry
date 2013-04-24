@@ -2,14 +2,12 @@
 #include <fstream> // include the class-definition here
 </%pre>
 <%cpp>
-  std::cout << "here" << std::endl;  
   std::string path = request.getPathInfo();
-  std::string image = path;
-  std::cout << "XX X"  <<image << std::endl;
-  std::ifstream fin(image.c_str(), std::ios::in | std::ios::binary);
+  std::string cssName(path.c_str() + 1);    // to skip the leading '/'
+  std::ifstream fin(cssName.c_str(), std::ios::in | std::ios::binary);
   std::ostringstream oss;
   oss << fin.rdbuf();
-  std::string imageData(oss.str());
+  std::string cssData(oss.str());
   reply.setContentType("text/css");
-  reply.out() << imageData;       // send the image to the client
+  reply.out() << cssData;       // send the image to the client
 </%cpp>

@@ -14,6 +14,7 @@ set (WEB_COMPONENTS
      menu
      css
      host_list
+     dashboard
 )
      
 set(${PROJECT}_SOURCES
@@ -23,7 +24,11 @@ set(${PROJECT}_SOURCES
      
 foreach(comp ${WEB_COMPONENTS})
   list(APPEND ${PROJECT}_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/${comp}.cpp )
-  execute_process(COMMAND ${ECPPC} -o ${CMAKE_CURRENT_BINARY_DIR}/${comp}.cpp -v -n ${comp} ${CMAKE_CURRENT_SOURCE_DIR}/${comp}.ecpp WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} OUTPUT_QUIET)
+  #execute_process(COMMAND ${ECPPC} -o ${CMAKE_CURRENT_BINARY_DIR}/${comp}.cpp -v -n ${comp} ${CMAKE_CURRENT_SOURCE_DIR}/${comp}.ecpp WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} OUTPUT_QUIET)
+  
+  add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${comp}.cpp
+                     COMMAND ${ECPPC} -o ${CMAKE_CURRENT_BINARY_DIR}/${comp}.cpp -v -n ${comp} ${CMAKE_CURRENT_SOURCE_DIR}/${comp}.ecpp
+                     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${comp}.ecpp)
   
   set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES  ${CMAKE_CURRENT_BINARY_DIR}/${comp}.cpp)
   

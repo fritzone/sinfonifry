@@ -69,7 +69,7 @@ int initialize_host_data(const char* host_ip, const char* data)
 
                     {
                         std::stringstream ss;
-                        ss << "insert into sinf01_disk (host_id, disk_fs_type, disk_mountpoint, disk_physical_id, disk_label, disk_total_space) values (";
+                        ss << "insert into sinf03_disk (host_id, disk_fs_type, disk_mountpoint, disk_physical_id, disk_label, disk_total_space) values (";
                         ss << host_id << ", '" << fs_type << "', '" << disk_mountpoint << "', '" << disk_part_name << "', '" << disk_label << "', " << total_disk_space << ")";
                         std::string query_for_insert_disk = ss.str();
                         conn.execute(query_for_insert_disk);
@@ -127,7 +127,7 @@ int data_received(const char* host_ip, const char* data)
         TiXmlElement* el_for_device = el_for_devices->FirstChildElement("device");
         std::stringstream qbr;
         qbr << "insert into " <<
-               "sinf01_disk_statistics(disk_stat_disk_id, disk_stat_free_space, disk_stat_measurement_time) " <<
+               "sinf03_disk_statistics(disk_stat_disk_id, disk_stat_free_space, disk_stat_measurement_time) " <<
                "values( :v1, :v2, to_timestamp(" << timestamp_attr << "))";
 
         tntdb::Statement prepared_insertion = conn.prepare(qbr.str());
@@ -150,7 +150,7 @@ int data_received(const char* host_ip, const char* data)
             int found_disk_id = 0;
             {
                 std::stringstream ss;
-                ss << "select disk_id from sinf01_disk where host_id=" << host_id <<" and disk_physical_id='"<< disk_part_name <<"'";
+                ss << "select disk_id from sinf03_disk where host_id=" << host_id <<" and disk_physical_id='"<< disk_part_name <<"'";
                 std::string s= ss.str();
                 //std::cout << s << std::endl;
                 tntdb::Result result = conn.select(s);
@@ -200,19 +200,16 @@ int data_received(const char* host_ip, const char* data)
             el_for_device = el_for_device->NextSiblingElement("device");
         }
 
-        // and update the "host" table with the last status
-        std::stringstream ss;
-        ss << "update sinf01_host set host_last_status=" << host_status << ", host_last_status_text='" << host_status_explanation << "' where host_id = " << host_id;
-        conn.execute(ss.str());
+        // and update the "host_status" table with the last status
+        //std::stringstream ss;
+        //ss << "update sinf01_host set host_last_status=" << host_status << ", host_last_status_text='" << host_status_explanation << "' where host_id = " << host_id;
+        //conn.execute(ss.str());
 
     } // devices node was found
     else
     {
         log_error("Malformatted query, no root element found");
     }
-
-
-
 
     return 1;
 }

@@ -33,3 +33,5 @@ install(TARGETS ${PROJECT} LIBRARY
 
 get_property(${PROJECT}_location_t TARGET ${PROJECT} PROPERTY LOCATION)
 set(${PROJECT}_location ${${PROJECT}_location_t} CACHE INTERNAL ${PROJECT}_location)
+
+set(${PROJECT}_directory ${CMAKE_CURRENT_SOURCE_DIR} CACHE INTERNAL ${PROJECT}_directory )

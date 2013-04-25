@@ -14,6 +14,7 @@ int main(int argc, char* argv[])
         app.listen("0.0.0.0", 8000);
         app.mapUrl("/sinfonifry", "sinfonifry");
         app.mapUrl("/host_list", "host_list");
+        app.mapUrl("/dashboard", "dashboard");
         app.mapUrl("/menu", "menu");
 
         app.mapUrl("/add_host", "add_host");

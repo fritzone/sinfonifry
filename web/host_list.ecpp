@@ -16,7 +16,8 @@ bool is_dot(char c)
         <table cellspacing="0">
           <%cpp>
             tntdb::Connection conn = tntdb::connect("postgresql:dbname=sinfonifry user=sinfonifry password=s1nf0n1fry");
-            std::string query_for_hosts = "select host_name, host_ip, host_id, to_char(host_last_seen_time,'YYYY/MM/DD HH24:MI:SS'), host_last_status, host_last_status_text from  sinf01_host order by host_name";
+            std::string query_for_hosts = "select host_name, host_ip, A.host_id, to_char(host_last_seen_time,'YYYY/MM/DD HH24:MI:SS'), host_last_status, host_last_status_text "
+                    "from  sinf01_host A , sinf01_host_status B where A.host_id = B.host_id order by host_name";
             tntdb::Result result = conn.select(query_for_hosts);
             for (tntdb::Result::const_iterator it = result.begin(); it != result.end(); ++it)
             {
@@ -34,7 +35,7 @@ bool is_dot(char c)
                 row[4].get(status);    // the one line status of the host
                 row[5].get(lastStatus);
                 // remove the "." from the text
-                std::string b = hostIp;
+                std::string b = hostIp; // the host ip, with . replaced with _
                 std::replace(b.begin(), b.end(), '.', '_');
                 std::string backgroundIndicator = "green";
                 std::string icon = "ok.png";
@@ -57,8 +58,7 @@ bool is_dot(char c)
                 reply.out() << "<td><img width=\"16\" height=\"16\" src=\"" << icon << "\"></td>";
                 reply.out() << "<td align=\"center\" valign=\"top\">"; // the cell for the host name, with the clickable context
                 reply.out() << "<p class=\"sinfonifry\" align=\"center\">" 
-                                << "<a href=\"javascript:showHide('tableDiskDataFor" << b << "')\" title=\"" << sstooltip.str() << "\">"
-                                << hostName << "</a>";
+                                << "<a href=\"/get_host_status?hostId=" << hostId << "\" target=\"centrum\">" << hostName << "</a>";
                 reply.out() <<"</p>"; // the actual IP of the hosts, clicking it will toggle the next field, together with last seen time and status
                 reply.out() << "</td>";  // closing the current cell of the host data
                 reply.out() << "</tr>";  // closing the current row

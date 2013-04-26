@@ -1,7 +1,6 @@
 <%pre>
 #include <tntdb.h>
 </%pre>
-
    <# the list of hosts below the menu #>
    <table class="sinfonifry">
    <# print a table line for each of the hosts in thd DB #>

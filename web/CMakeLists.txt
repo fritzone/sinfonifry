@@ -14,6 +14,7 @@ set (WEB_COMPONENTS
      menu
      css
      host_list
+     host_info
      dashboard
 )
      

@@ -12,6 +12,8 @@ log_define("sinfonifry.core.plugin.disk_status")
 
 int initialize_host_data(const char* host_ip, const char* data)
 {
+    try
+    {
     TiXmlDocument doc;
     bool success = doc.FromMemory(data);
     if(success)
@@ -29,6 +31,11 @@ int initialize_host_data(const char* host_ip, const char* data)
             row[0].get(host_id);
         }
 
+        // now add a row in the sinf01_host_status table indicating the first entry for this
+        std::stringstream insert_into_host_status;
+        insert_into_host_status << "insert into sinf01_host_status (host_id, plugin, host_last_status, show_status, host_last_status_text) values (" <<
+                                   host_id << ", '" <<name() << "', 0, 0, '')";
+        conn.execute(insert_into_host_status.str());
 
         TiXmlElement* el_for_devices = doc.FirstChildElement("devices");
         if(el_for_devices)
@@ -87,6 +94,12 @@ int initialize_host_data(const char* host_ip, const char* data)
         }
     }
     return 0;
+    }
+    catch(std::exception& ex)
+    {
+        log_error (ex.what());
+        return 0;
+    }
 
 }
 
@@ -201,9 +214,9 @@ int data_received(const char* host_ip, const char* data)
         }
 
         // and update the "host_status" table with the last status
-        //std::stringstream ss;
-        //ss << "update sinf01_host set host_last_status=" << host_status << ", host_last_status_text='" << host_status_explanation << "' where host_id = " << host_id;
-        //conn.execute(ss.str());
+        std::stringstream ss;
+        ss << "update sinf01_host_status set show_status=1, host_last_status=" << host_status << ", host_last_status_text='" << host_status_explanation << "' where host_id = " << host_id << " and plugin='"<<name()<<"'";
+        conn.execute(ss.str());
 
     } // devices node was found
     else

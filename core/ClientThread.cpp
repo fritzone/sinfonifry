@@ -78,8 +78,8 @@ void ClientThread::run()
   ss << m_worker->rdbuf();
   std::string s =ss.str();
   log_debug(s);
-  std::cout << s << std::endl;
   std::string ip = m_worker->getPeerAddr();
+  std::cout << ip << std::endl;
 
   // the host ID
   uint32_t host_id = 0;

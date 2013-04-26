@@ -16,6 +16,7 @@ int main(int argc, char* argv[])
         app.mapUrl("/host_list", "host_list");
         app.mapUrl("/dashboard", "dashboard");
         app.mapUrl("/menu", "menu");
+        app.mapUrl("/host_info", "host_info");
 
         app.mapUrl("/add_host", "add_host");
         app.mapUrl("/get_data", "get_data");

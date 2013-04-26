@@ -199,7 +199,18 @@ std::vector<plugin_descriptor*> PluginHelper::int_getSignedPlugins(PLUGIN_COMPON
         }
 
         // create a basic plugin object
-        plugin_descriptor* plugin = (plugin_descriptor*)calloc(sizeof(plugin_descriptor), 1);
+        plugin_descriptor* plugin = 0;
+
+        if(comp == PLUGIN_CLIENT)
+        {
+            plugin = (plugin_descriptor*)calloc(sizeof(client_plugin_descriptor), 1);
+        }
+        else
+        if(comp == PLUGIN_CORE)
+        {
+            plugin = (plugin_descriptor*)calloc(sizeof(core_plugin_descriptor), 1);
+        }
+
         plugin->lib_handle = lib_handle;
         copy_string_to_char(plugin_names[i], plugin->name);
         copy_string_to_char(plugin_name_library, plugin->lib_name);

@@ -89,9 +89,9 @@
 </head>
 
 <frameset cols="250px,*,300px" frameborder="0">
-  <frame src="/host_list" border="1" noresize name="menu">
-  <frame src="/dashboard" >
-  <frame src="/menu" border="1" noresize name="menu">
+  <frame src="/host_list" border="1" noresize name="menu" >
+  <frame src="/dashboard" name="centrum" >
+  <frame src="/menu" border="1" noresize name="menu" >
 </frameset> 
 
 </body>

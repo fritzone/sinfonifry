@@ -2,13 +2,25 @@
 
 #include <cxxtools/loginit.h>
 
+#include <plugin_helper.h>
+#include <configuration.h>
+
 log_define("sinfonifry.web")
+
+using namespace sinfonifry;
 
 int main(int argc, char* argv[])
 {
   try
   {
+
         log_init("log.properties");
+
+        // load the configuration
+        const Configuration& conf = Configuration::defaultConfiguration();
+
+        // initialize the proper PluginHelper
+        PluginHelper::initialize(PLUGIN_VISUALIZATION, conf);
 
         tnt::Tntnet app;
         app.listen("0.0.0.0", 8000);

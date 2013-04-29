@@ -210,6 +210,11 @@ std::vector<plugin_descriptor*> PluginHelper::int_getSignedPlugins(PLUGIN_COMPON
         {
             plugin = (plugin_descriptor*)calloc(sizeof(core_plugin_descriptor), 1);
         }
+        if(comp == PLUGIN_VISUALIZATION)
+        {
+            plugin = (plugin_descriptor*)calloc(sizeof(web_plugin_descriptor), 1);
+        }
+
 
         plugin->lib_handle = lib_handle;
         copy_string_to_char(plugin_names[i], plugin->name);
@@ -264,6 +269,19 @@ std::vector<plugin_descriptor*> PluginHelper::int_getSignedPlugins(PLUGIN_COMPON
             }
             static_cast<core_plugin_descriptor*>(plugin)->f_initalize_host_data= init_host_mth;
         }
+
+        if(comp == PLUGIN_VISUALIZATION)
+        {
+            P_WEB_DESCRIPTIVE_NAME desc_name = get_method<P_WEB_DESCRIPTIVE_NAME>("descriptive_name", lib_handle);
+            if(desc_name == 0)
+            {
+                discard(plugin, "no descriptive_name() for a visualization plugin");
+                continue;
+            }
+            static_cast<web_plugin_descriptor*>(plugin)->f_descriptive_name = desc_name;
+
+        }
+
 
         // we are here, this plugin seems to be a happy one regarding signage
 

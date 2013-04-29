@@ -6,6 +6,7 @@
 
 #include "sinfonifry_plugin_client.h"
 #include "sinfonifry_plugin_core.h"
+#include "sinfonifry_plugin_vis.h"
 #include "sinfonifry_plugin_base.h"
 #include "sinfonifry_signed_plugin.h"
 #include "components.h"
@@ -72,6 +73,17 @@ struct core_plugin_descriptor : public plugin_descriptor
     P_CORE_INITIALIZE_HOST_DATA f_initalize_host_data;
 
     P_CORE_DATA_RECEIVED f_data_received;
+};
+
+struct web_plugin_descriptor : public plugin_descriptor
+{
+    P_WEB_DATA_REQUEST f_data_request;
+
+    P_WEB_STYLES f_styles;
+
+    P_WEB_DESCRIPTIVE_NAME f_descriptive_name;
+
+    P_WEB_JAVASCRIPTS f_javascripts;
 };
 
 /**

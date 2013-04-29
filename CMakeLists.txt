@@ -112,10 +112,25 @@ if(POSIX)
     FILE(APPEND ${CONFIG_FILE} " </plugins>\n")
     FILE(APPEND ${CONFIG_FILE} " </core>\n")
 
-
     # installation step for the core database
 
   endif() # core
+  
+  # now see if we did build the web component
+  if(BUILD_SINFONIFRY_WEB)
+    FILE(APPEND ${CONFIG_FILE} " <vis>\n")
+    FILE(APPEND ${CONFIG_FILE} " <plugins>\n")
+
+    # and the plugins
+    if(PLUGIN_DISK_STATUS_WEB)
+      add_plugin_to_config(${CONFIG_FILE} "disk_status" "1" "vis")
+    endif()
+    
+    FILE(APPEND ${CONFIG_FILE} " </plugins>\n")
+    FILE(APPEND ${CONFIG_FILE} " </vis>\n")
+  endif()
+
+  
 endif() # POSIX
 
 FILE(APPEND ${CONFIG_FILE} "</sinfonifry>\n")

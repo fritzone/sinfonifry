@@ -6,6 +6,7 @@ using namespace sinfonifry;
 </%pre>
 <%args>
 std::string hostId;
+std::string hostIp;
 </%args>
 <html>
 
@@ -20,6 +21,19 @@ std::string hostId;
     ul#tabs li a.selected { color: #000; background-color: #f1f0ee; font-weight: bold; padding: 0.7em 0.3em 0.38em 0.3em; }
     div.tabContent { border: 2px solid #c9c3ba; padding: 0.5em; background-color: #f1f0ee; }
     div.tabContent.hide { display: none; }
+
+    <!-- Here insert the styles from the plugins -->
+    <%cpp>
+    const std::vector<plugin_descriptor*>& web_plugins = PluginHelper::instance().getSignedPlugins();
+    for(int i=0; i< web_plugins.size(); i++)
+    {
+        web_plugin_descriptor* wpc = static_cast<web_plugin_descriptor*>(web_plugins[i]);
+        if(wpc->f_styles)
+        {
+            reply.out() << wpc->f_styles() ;
+        }
+    }
+    </%cpp>
   </style>
 
 
@@ -93,6 +107,18 @@ std::string hostId;
     }
 
     //]]>
+    <# Here insert the javascripts from the plugins #>
+
+    <%cpp>
+    for(int i=0; i< web_plugins.size(); i++)
+    {
+        web_plugin_descriptor* wpc = static_cast<web_plugin_descriptor*>(web_plugins[i]);
+        if(wpc->f_javascripts)
+        {
+            reply.out() << wpc->f_javascripts() ;
+        }
+    }
+    </%cpp>
   </script>
 </head>
 
@@ -101,20 +127,32 @@ std::string hostId;
     <!-- Creating the TAB for the plugins -->
     <ul id="tabs">
     <%cpp>
-    const std::vector<plugin_descriptor*>& web_plugins = PluginHelper::instance().getSignedPlugins();
     for(int i=0; i< web_plugins.size(); i++)
     {
         web_plugin_descriptor* wpc = static_cast<web_plugin_descriptor*>(web_plugins[i]);
-        log_info( wpc << " add " << wpc->f_descriptive_name);
         reply.out() << "<li><a href=\"#" << wpc->name << "\">" <<  wpc->f_descriptive_name() << "</a></li>";
     }
     reply.out() << "</ul>";
 
     for(int i=0; i< web_plugins.size(); i++)
     {
-        reply.out() << "<div class=\"tabContent\" id=\"" << web_plugins[i]->name << "\"><div><p>"
-                    << "Even more."
-                    << "</p></div></div>";
+        web_plugin_descriptor* wpc = static_cast<web_plugin_descriptor*>(web_plugins[i]);
+
+        reply.out() << "<div class=\"tabContent\" id=\"" << web_plugins[i]->name << "\"><div><p>";
+
+        // and now print the output of the web plugin
+        if(wpc->f_data_request)
+        {
+            ALLOCATION_BEHAVIOR ab = DO_NOT_FREE_ME;
+            char* s = wpc->f_data_request(&ab, hostIp.c_str());
+            log_debug("from" << hostIp << "GOT:" << s);
+            reply.out() << s;
+        }
+        else
+        {
+            reply.out() << "no data request";
+        }
+        reply.out() << "</p></div></div>";
     }
     </%cpp>
   </body>

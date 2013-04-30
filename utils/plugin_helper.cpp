@@ -280,6 +280,34 @@ std::vector<plugin_descriptor*> PluginHelper::int_getSignedPlugins(PLUGIN_COMPON
             }
             static_cast<web_plugin_descriptor*>(plugin)->f_descriptive_name = desc_name;
 
+            P_WEB_DATA_REQUEST data_req = get_method<P_WEB_DATA_REQUEST>("data_request", lib_handle);
+            if(data_req == 0)
+            {
+                discard(plugin, "no data_request() for a visualization plugin");
+                continue;
+            }
+            static_cast<web_plugin_descriptor*>(plugin)->f_data_request = data_req;
+
+
+            P_WEB_STYLES styles = get_method<P_WEB_STYLES>("styles", lib_handle);
+            if(styles == 0)
+            {
+                log_warn("no styles() for a visualization plugin, this plugin will not use styles");
+            }
+            if(styles)
+            {
+                static_cast<web_plugin_descriptor*>(plugin)->f_styles = styles;
+            }
+
+            P_WEB_JAVASCRIPTS scripts = get_method<P_WEB_JAVASCRIPTS>("javascripts", lib_handle);
+            if(scripts == 0)
+            {
+                log_warn("no javascripts() for a visualization plugin, this plugin will not use javascripts");
+            }
+            if(scripts)
+            {
+                static_cast<web_plugin_descriptor*>(plugin)->f_javascripts = scripts;
+            }
         }
 
 

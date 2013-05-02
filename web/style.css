@@ -48,20 +48,7 @@ span.sinfonifry {
   text-align: center;
   text-indent: 0ex;
 }
-p.table_text {
-  font-family: sans-serif;
-  font-style: normal;
-  font-variant: normal;
-  font-weight: normal;
-  font-size: medium;
-  line-height: 100%;
-  word-spacing: normal;
-  letter-spacing: normal;
-  text-decoration: none;
-  text-transform: none;
-  text-align: left;
-  text-indent: 0ex;
-}
+
 div.hidden {
   display:none
 }
@@ -94,10 +81,6 @@ button {
   color: #333333;
   width: 75px;
   height: 21px;
-}
-
-tr.d0 {
-        background-color: #C0C9D9; color: black;
 }
 
 tr.green {

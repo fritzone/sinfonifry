@@ -9,9 +9,7 @@ std::string hostId;
 std::string hostIp;
 </%args>
 <html>
-
 <head>
-
   <style type="text/css">
     body { font-size: 80%; font-family: 'Lucida Grande', Verdana, Arial, Sans-Serif; }
     ul#tabs { list-style-type: none; margin: 15px 0 0 0; padding: 0 0 0.3em 0; }
@@ -145,8 +143,16 @@ std::string hostIp;
         {
             ALLOCATION_BEHAVIOR ab = DO_NOT_FREE_ME;
             char* s = wpc->f_data_request(&ab, hostIp.c_str());
-            log_debug("from" << hostIp << "GOT:" << s);
             reply.out() << s;
+            if(ab = DELETE_ME)
+            {
+                delete [] s;
+            }
+            else
+            if(ab == FREE_ME)
+            {
+                free(s);
+            }
         }
         else
         {

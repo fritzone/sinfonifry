@@ -193,3 +193,9 @@ const char* styles()
 
     return s;
 }
+
+const char* const* entrypoints()
+{
+    static const char* arrays[] = {"test123", "test2", 0};
+    return arrays;
+}

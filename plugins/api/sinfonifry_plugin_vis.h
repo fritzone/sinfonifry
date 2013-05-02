@@ -34,6 +34,16 @@ extern "C" {
  * This method can reference javascript functions that were returned by the
  * javascripts() method below.
  *
+ * @b About links
+ *
+ * In order to have a consistency among the way the results are shown there is
+ * a link filtering in the application. Every @c a HTML tag is being parsed
+ * out from the returned string, and only the @c href attribute is kept.
+ * If this href points to one of your entry points @link entry_points() @endlink
+ * then more filtering is being done, we need to inert our entry point wrapper
+ * core to be able to call yourentry point. There is one exception, if your
+ * link has the targe "_blank" it will not be touched.
+ *
  * @param [out] free_returned_value How to deal with the data that is
  * returned. The following values are possible:
  *   @li @c DO_NOT_FREE_ME - the caller function does not free the data.
@@ -83,6 +93,22 @@ const char* javascripts();
  */
 const char* descriptive_name();
 
+/**
+ * @brief entrypoints should return a vector of enrtypoints which can be referenced from the
+ * generated script.
+ *
+ * The last element of this array acts as a sentinel and is always 0. If the plugin loader
+ * encounters an entrypoint which cannot be loaded from the library it will automatically
+ * discard the plugin.
+ *
+ * An entrypoint is a function with signature @code void entrypoint(const char* query_parameters)
+ * @endcode . The query_parameters is the request parameters passed in to the function-
+ *  In order to retrieve the values of the query parameters use the query_param() function.
+ * @return
+ */
+const char* const* entrypoints();
+
+
 /*****************************************************************************
  *      Typedefs used for the function pointers of client plugins            *
  *****************************************************************************/
@@ -106,6 +132,10 @@ typedef const char* (*P_WEB_JAVASCRIPTS)();
 /** Function pointer typedef for the @link descriptive_name() @endlink
  *  function */
 typedef const char* (*P_WEB_DESCRIPTIVE_NAME)();
+
+/** Function pointer typedef for the @link entrypoints() @endlink
+ *  function */
+typedef const char* const *(*P_WEB_ENTRYPOINTS)();
 
 #ifdef __cplusplus
 }

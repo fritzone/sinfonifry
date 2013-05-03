@@ -38,7 +38,7 @@ const char* descriptive_name()
     return "Disk Status";
 }
 
-char* data_request(ALLOCATION_BEHAVIOR *free_returned_value, const char *ip)
+char* data_request(ALLOCATION_BEHAVIOR *free_returned_value, const char *ip, const char *div_name)
 {
     // the host ID
     uint32_t host_id = 0;
@@ -93,19 +93,21 @@ char* data_request(ALLOCATION_BEHAVIOR *free_returned_value, const char *ip)
       std::string mountpt;
       uint64_t freeSpace;
       uint64_t totalSpace;
+      uint64_t disk_id;
       std::string physId;
       row[0].get(mountpt);
+      row[1].get(disk_id);
       row[2].get(freeSpace);
       row[4].get(totalSpace);
       row[5].get(physId);
       if(totalSpace > 0) // do not go in there if there is no space on the device (swap for example)
-      { // }
+      {
         reply << "     <tr>";
         // the mountpoint
         reply << "      <td>";
-          reply << "<p class=\"table_text\" title=\"" << physId << "\">"     ;
-          // TODO: This was a sout() !!!
-        reply << mountpt;
+        reply << "<p class=\"table_text\" title=\"" << physId << "\">"     ;
+        // TODO: This was a sout() !!!
+        reply << "<@ep name=\"disk_details\" params=\"id=" << disk_id << "\" display=\"" << mountpt << "\">";
         reply <<"</p>";
         reply << "      </td>";
         // the free space
@@ -128,21 +130,20 @@ char* data_request(ALLOCATION_BEHAVIOR *free_returned_value, const char *ip)
         reply << 100 * freeSpace / totalSpace;
         reply <<"%</p>";
         reply << "      </td>";
-          {
-          std::string iconToUse = "ok.png";
-          if(100 * freeSpace / totalSpace < 5)
-          { // }
-            iconToUse = "error.png";
-          }
-          else
-          if(100 * freeSpace / totalSpace < 15)
-          {// }
-            iconToUse = "warning.png";
-          }
-          reply << "      <td>";
-          reply << "       <img src=\"" << iconToUse <<"\" width=\"22\" height=\"22\"/>";
-          reply << "      </td>";
-          }
+
+        std::string iconToUse = "ok.png";
+        if(100 * freeSpace / totalSpace < 5)
+        { // }
+        iconToUse = "error.png";
+        }
+        else
+        if(100 * freeSpace / totalSpace < 15)
+        {// }
+        iconToUse = "warning.png";
+        }
+        reply << "      <td>";
+        reply << "       <img src=\"" << iconToUse <<"\" width=\"22\" height=\"22\"/>";
+        reply << "      </td>";
 
         reply << "     </tr>\n";
       } // if totalSpace
@@ -198,4 +199,9 @@ const char* const* entrypoints()
 {
     static const char* arrays[] = {"test123", "test2", 0};
     return arrays;
+}
+
+const char* javascripts()
+{
+    return 0;
 }

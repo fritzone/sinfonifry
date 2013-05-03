@@ -2,6 +2,7 @@
 #include <tntdb.h>
 #include <string>
 #include <plugin_helper.h>
+#include "utils_web.h"
 using namespace sinfonifry;
 </%pre>
 <%args>
@@ -28,11 +29,75 @@ std::string hostIp;
         web_plugin_descriptor* wpc = static_cast<web_plugin_descriptor*>(web_plugins[i]);
         if(wpc->f_styles)
         {
-            reply.out() << wpc->f_styles() ;
+            const char* styles = wpc->f_styles();
+            if(styles)
+            {
+                reply.out() << styles;
+            }
         }
     }
     </%cpp>
   </style>
+
+  <script src="/jquery.js"></script>
+
+  <# this below will make all the links to go through this function. #>
+  <# will initiate an ajax call and put the result in the div requested #>
+  <script type="text/javascript">
+    $(function() {
+        $("a").click(function() {
+            return someMethodName($(this).attr('href'));
+        });
+    });
+
+    function someMethodName(hrf)
+    {
+        performRequest(hrf)
+        return false;
+    }
+
+    function performRequest(hrf)
+    {
+      // firstly remove the &sinfonifry_target=div_something from the query and store it.
+      // supposedly this sinfonifry_target is written to the end
+      var attr_name ="&sinfonifry_target";
+      var target_div = "";
+      var sfry_div_idx=hrf.indexOf(attr_name);
+      if(sfry_div_idx != -1)
+      {
+          target_div = hrf.substring(sfry_div_idx + attr_name.length + 1);
+          hrf = hrf.substring(0, sfry_div_idx );
+      }
+      console.log(target_div);
+
+      var xmlhttp;
+      if(window.XMLHttpRequest)
+      {
+          xmlhttp=new XMLHttpRequest();
+      }
+      else
+      {
+        xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+      }
+      xmlhttp.onreadystatechange=function()
+      {
+        console.log("STATECHANGE ", xmlhttp.readyState, xmlhttp.status);
+
+        if (xmlhttp.readyState==4 && xmlhttp.status == 200)
+        {
+
+              console.log(xmlhttp.responseText)     ;
+          document.getElementById(target_div).innerHTML=xmlhttp.responseText;
+        }
+      }
+      s=hrf;
+      xmlhttp.open("GET", s, true);
+      xmlhttp.send();
+    }
+
+  </script>
+
+
 
 
   <script type="text/javascript">
@@ -113,7 +178,11 @@ std::string hostIp;
         web_plugin_descriptor* wpc = static_cast<web_plugin_descriptor*>(web_plugins[i]);
         if(wpc->f_javascripts)
         {
-            reply.out() << wpc->f_javascripts() ;
+            const char* jscripts = wpc->f_javascripts();
+            if(jscripts)
+            {
+                reply.out() << jscripts;
+            }
         }
     }
     </%cpp>
@@ -128,22 +197,24 @@ std::string hostIp;
     for(int i=0; i< web_plugins.size(); i++)
     {
         web_plugin_descriptor* wpc = static_cast<web_plugin_descriptor*>(web_plugins[i]);
-        reply.out() << "<li><a href=\"#" << wpc->name << "\">" <<  wpc->f_descriptive_name() << "</a></li>";
+        reply.out() << "<li><a href=\"#div_" << wpc->name << "\">" <<  wpc->f_descriptive_name() << "</a></li>";
     }
     reply.out() << "</ul>";
 
     for(int i=0; i< web_plugins.size(); i++)
     {
         web_plugin_descriptor* wpc = static_cast<web_plugin_descriptor*>(web_plugins[i]);
-
-        reply.out() << "<div class=\"tabContent\" id=\"" << web_plugins[i]->name << "\"><div><p>";
+        std::string div_name = std::string("div_") + wpc->name;
+        reply.out() << "<div class=\"tabContent\" id=\"" << div_name << "\"><div><p>";
 
         // and now print the output of the web plugin
         if(wpc->f_data_request)
         {
             ALLOCATION_BEHAVIOR ab = DO_NOT_FREE_ME;
-            char* s = wpc->f_data_request(&ab, hostIp.c_str());
-            reply.out() << s;
+            char* s = wpc->f_data_request(&ab, hostIp.c_str(), div_name.c_str());
+            std::string fixed = fix_entrypoints(std::string(s), wpc->name);
+            reply.out() << fixed;
+
             if(ab = DELETE_ME)
             {
                 delete [] s;

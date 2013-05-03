@@ -44,7 +44,7 @@ endforeach()
 
 configure_file("${SINFONIFRY_ROOT}/templates/instdir.h.template" ${CMAKE_CURRENT_BINARY_DIR}/instdir.h)
 
-list(APPEND ${PROJECT}_SOURCES main.cpp )
+list(APPEND ${PROJECT}_SOURCES main.cpp utils_web.cpp)
 
 include_directories(
   "/usr/local/include/"
@@ -52,6 +52,7 @@ include_directories(
   "${SINFONIFRY_ROOT}/utils"
   "${SINFONIFRY_ROOT}/plugins/api"
   "${SINFONIFRY_ROOT}/inc"
+  "${SINFONIFRY_ROOT}/web"
   ${CMAKE_CURRENT_BINARY_DIR}
 )
 

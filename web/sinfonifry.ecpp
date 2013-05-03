@@ -5,6 +5,8 @@
 
 <head>
    <title>sinfonifry</title>
+   <script src="/jquery.js"></script>
+
    <script type="text/javascript">
     
     var shownElements=new Array();

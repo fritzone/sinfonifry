@@ -25,7 +25,8 @@ extern "C" {
  *
  * The WEB gui of the sinfonifry presents the plugin data of each host in a
  * tabbed interface, where the tab names are the plugin names and the
- * tab data, which is placed in a @c div is returned by this function.
+ * tab data (which is placed in a @c div named @c div_name ) is returned by this
+ * function.
  *
  * This method should retrieve the entries for the given host, format an
  * html and send back (ie. return) the data to the caller. The method can use
@@ -34,15 +35,34 @@ extern "C" {
  * This method can reference javascript functions that were returned by the
  * javascripts() method below.
  *
- * @b About links
+ * The final destination for this data is inside the @c div whose name is passed
+ * in as a parameter to this function (@c div_name). This will allow you to
+ * write more dynamic HTML.
+ *
+ * @b Links
  *
  * In order to have a consistency among the way the results are shown there is
- * a link filtering in the application. Every @c a HTML tag is being parsed
- * out from the returned string, and only the @c href attribute is kept.
- * If this href points to one of your entry points @link entry_points() @endlink
- * then more filtering is being done, we need to inert our entry point wrapper
- * core to be able to call yourentry point. There is one exception, if your
- * link has the targe "_blank" it will not be touched.
+ * a link filtering in the application. Every @c "a" HTML tag is being parsed
+ * from the returned string, and rewritten in a way to display the result from
+ * the server in the @c div dedicated to the plugin.
+ *
+ * The linking functionality has been reduced to make a request via an ajax
+ * based interface and to display the reply from the server, linking to external
+ * sites is not working, unless thy can send reply in a manner to be understood
+ * by the ajax mechanism of sinfonifry.
+ *
+ * @b Entrypoints
+ *
+ * In order to support the entrypoints the following HTML extension was added
+ * to the application:
+ *
+ * @code
+ * <@ep name="ep_name" params="id=1234" display="link_text">
+ * @endcode
+ *
+ * When encountered this extension sequence in the returned code the sinfonifry
+ * parser will generate a valid @c a HTML tag for the extension point manager
+ * to call the required extension point in the © div of the plugin.
  *
  * @param [out] free_returned_value How to deal with the data that is
  * returned. The following values are possible:
@@ -52,10 +72,11 @@ extern "C" {
  * For a detailed description of these value see @link ALLOCATION_BEHAVIOR
  * @endlink
  * @param [in] ip the IP for which we request data.
+ * @param [in] div_name The name of the @c div tag into which the generated HTML will go.
  * @return an HTML string, which will be presented by the GUI in the specific
  * placeholder forthe plugin.
  */
-char* data_request(ALLOCATION_BEHAVIOR* free_returned_value, const char* ip);
+char* data_request(ALLOCATION_BEHAVIOR* free_returned_value, const char* ip, const char* div_name);
 
 /**
  * @brief styles is called upon the first rendering of the container page for a host
@@ -119,7 +140,7 @@ const char* const* entrypoints();
 
 /** Function pointer typedef for the @link data_request()
  *  @endlink function. */
-typedef char* (*P_WEB_DATA_REQUEST)(ALLOCATION_BEHAVIOR*, const char*);
+typedef char* (*P_WEB_DATA_REQUEST)(ALLOCATION_BEHAVIOR*, const char*, const char*);
 
 /** Function pointer typedef for the @link styles() @endlink
  *  function */
@@ -135,7 +156,7 @@ typedef const char* (*P_WEB_DESCRIPTIVE_NAME)();
 
 /** Function pointer typedef for the @link entrypoints() @endlink
  *  function */
-typedef const char* const *(*P_WEB_ENTRYPOINTS)();
+typedef const char* const *(*P_WEB_ENTRYPOINTS)(const char*);
 
 #ifdef __cplusplus
 }

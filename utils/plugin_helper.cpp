@@ -247,6 +247,15 @@ std::vector<plugin_descriptor*> PluginHelper::int_getSignedPlugins(PLUGIN_COMPON
                 continue;
             }
             static_cast<client_plugin_descriptor*>(plugin)->f_setup = setupmth;
+
+            // load the release method
+            P_CLIENT_RELEASE releasemth = get_method<P_CLIENT_RELEASE>("release", lib_handle);
+            if (releasemth == 0)
+            {
+                discard(plugin, "no release() method for a client plugin");
+                continue;
+            }
+            static_cast<client_plugin_descriptor*>(plugin)->f_release = releasemth;
         }
 
         if(comp == PLUGIN_CORE)
@@ -279,6 +288,15 @@ std::vector<plugin_descriptor*> PluginHelper::int_getSignedPlugins(PLUGIN_COMPON
                 continue;
             }
             static_cast<web_plugin_descriptor*>(plugin)->f_descriptive_name = desc_name;
+
+            // load the release method
+            P_WEB_RELEASE releasemth = get_method<P_WEB_RELEASE>("release", lib_handle);
+            if (releasemth == 0)
+            {
+                discard(plugin, "no release() method for a client plugin");
+                continue;
+            }
+            static_cast<web_plugin_descriptor*>(plugin)->f_release = releasemth;
 
             P_WEB_DATA_REQUEST data_req = get_method<P_WEB_DATA_REQUEST>("data_request", lib_handle);
             if(data_req == 0)
@@ -326,27 +344,28 @@ std::vector<plugin_descriptor*> PluginHelper::int_getSignedPlugins(PLUGIN_COMPON
 std::string PluginHelper::executeClientPlugin(plugin_descriptor* pd)
 {
     // check if this is an internal signed plugin or not
-    ALLOCATION_BEHAVIOR what_to_do = DO_NOT_FREE_ME;
     client_plugin_descriptor* cpd = static_cast<client_plugin_descriptor*>(pd);
 
     unsigned int ret_len = 0;
-    char* c = cpd->f_execute(&what_to_do, &ret_len);
+    char* c = cpd->f_execute(&ret_len);
+    if(!c)
+    {
+        return "";
+    }
     if(ret_len == 0)
     {
         ret_len = strlen(c);
     }
+    if(ret_len == 0)
+    {
+        cpd->f_release(c);
+
+        return "";
+    }
 
     std::string s = base64_encode((const unsigned char *)c, ret_len);
 
-    if(what_to_do == FREE_ME)
-    {
-        free(c);
-    }
-    else
-    if(what_to_do == DELETE_ME)
-    {
-        delete [] c;
-    }
+    cpd->f_release(c);
 
     return s;
 }

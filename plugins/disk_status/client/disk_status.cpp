@@ -115,18 +115,24 @@ std::string gather_disk_stat()
     blkid_dev_iterate_end(iter);
     ss << "</devices>";
     std::string s = ss.str();
+
+    free(cache);
     return s;
 }
 
 // called when the plugin container needs data. Caller needs to free the data
-char* execute(ALLOCATION_BEHAVIOR *free_returned_value, unsigned int* length)
+char* execute(unsigned int* length)
 {
     std::string s = gather_disk_stat();
     char* c = (char*)calloc(s.length() + 1, sizeof(char));
     strncpy(c, s.c_str(), s.length());
     *length = s.length();
-    *free_returned_value = FREE_ME;
     return c;
+}
+
+void release(char* intermediary)
+{
+    delete intermediary;
 }
 
 // called upon loading the plugin. Internal initialization can be done

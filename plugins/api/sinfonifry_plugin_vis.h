@@ -64,19 +64,21 @@ extern "C" {
  * parser will generate a valid @c a HTML tag for the extension point manager
  * to call the required extension point in the © div of the plugin.
  *
- * @param [out] free_returned_value How to deal with the data that is
- * returned. The following values are possible:
- *   @li @c DO_NOT_FREE_ME - the caller function does not free the data.
- *   @li @c FREE_ME - free the data with the function @c free() .
- *   @li @c DELETE_ME - free the allocated memory with @c delete [] .
- * For a detailed description of these value see @link ALLOCATION_BEHAVIOR
- * @endlink
  * @param [in] ip the IP for which we request data.
  * @param [in] div_name The name of the @c div tag into which the generated HTML will go.
  * @return an HTML string, which will be presented by the GUI in the specific
  * placeholder forthe plugin.
  */
-char* data_request(ALLOCATION_BEHAVIOR* free_returned_value, const char* ip, const char* div_name);
+char* data_request(const char *ip, const char *div_name);
+
+/**
+ * @brief This method is called after the value returned by data_request() was
+ * processed by the framework.
+ *
+ * @param [in] intermediary is the pointer that was returned by the
+ * data_request() method. Please deal with it using the appropriate methods.
+ */
+void release(char* intermediary);
 
 /**
  * @brief styles is called upon the first rendering of the container page for a host
@@ -140,7 +142,7 @@ const char* const* entrypoints();
 
 /** Function pointer typedef for the @link data_request()
  *  @endlink function. */
-typedef char* (*P_WEB_DATA_REQUEST)(ALLOCATION_BEHAVIOR*, const char*, const char*);
+typedef char* (*P_WEB_DATA_REQUEST)(const char*, const char*);
 
 /** Function pointer typedef for the @link styles() @endlink
  *  function */
@@ -157,6 +159,10 @@ typedef const char* (*P_WEB_DESCRIPTIVE_NAME)();
 /** Function pointer typedef for the @link entrypoints() @endlink
  *  function */
 typedef const char* const *(*P_WEB_ENTRYPOINTS)(const char*);
+
+/** Function pointer typedef for the @link release() @endlink
+ *  function */
+typedef void const (*P_WEB_RELEASE)(char*);
 
 #ifdef __cplusplus
 }

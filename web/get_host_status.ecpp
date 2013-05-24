@@ -46,11 +46,11 @@ std::string hostIp;
   <script type="text/javascript">
     $(function() {
         $("a").click(function() {
-            return someMethodName($(this).attr('href'));
+            return callRequest($(this).attr('href'));
         });
     });
 
-    function someMethodName(hrf)
+    function callRequest(hrf)
     {
         performRequest(hrf)
         return false;
@@ -191,18 +191,26 @@ std::string hostIp;
 
 <body onload="init()">
 
+    <a href="/get_host_status?hostId=<$hostId$>&hostIp=<$hostIp$>" target="centrum"> <img src="refresh.png" width="16" height="16"></a>
+
     <!-- Creating the TAB for the plugins -->
     <ul id="tabs">
+
     <%cpp>
     for(int i=0; i< web_plugins.size(); i++)
     {
         web_plugin_descriptor* wpc = static_cast<web_plugin_descriptor*>(web_plugins[i]);
         reply.out() << "<li><a href=\"#div_" << wpc->name << "\">" <<  wpc->f_descriptive_name() << "</a></li>";
     }
-    reply.out() << "</ul>";
+    </%cpp>
 
+    </ul>
+
+    <%cpp>
+    // Creating the TAB pages for the plugins
     for(int i=0; i< web_plugins.size(); i++)
     {
+        // for each of the plugins
         web_plugin_descriptor* wpc = static_cast<web_plugin_descriptor*>(web_plugins[i]);
         std::string div_name = std::string("div_") + wpc->name;
         reply.out() << "<div class=\"tabContent\" id=\"" << div_name << "\"><div><p>";
@@ -210,20 +218,10 @@ std::string hostIp;
         // and now print the output of the web plugin
         if(wpc->f_data_request)
         {
-            ALLOCATION_BEHAVIOR ab = DO_NOT_FREE_ME;
-            char* s = wpc->f_data_request(&ab, hostIp.c_str(), div_name.c_str());
+            char* s = wpc->f_data_request(hostIp.c_str(), div_name.c_str());
             std::string fixed = fix_entrypoints(std::string(s), wpc->name);
             reply.out() << fixed;
-
-            if(ab = DELETE_ME)
-            {
-                delete [] s;
-            }
-            else
-            if(ab == FREE_ME)
-            {
-                free(s);
-            }
+            wpc->f_release(s);
         }
         else
         {

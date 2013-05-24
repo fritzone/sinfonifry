@@ -66,6 +66,8 @@ struct client_plugin_descriptor : public plugin_descriptor
     P_CLIENT_EXECUTE f_execute;
 
     P_CLIENT_SETUP f_setup;
+
+    P_CLIENT_RELEASE f_release;
 };
 
 struct core_plugin_descriptor : public plugin_descriptor
@@ -84,6 +86,8 @@ struct web_plugin_descriptor : public plugin_descriptor
     P_WEB_DESCRIPTIVE_NAME f_descriptive_name;
 
     P_WEB_JAVASCRIPTS f_javascripts;
+
+    P_WEB_RELEASE f_release;
 };
 
 /**

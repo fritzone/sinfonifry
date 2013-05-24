@@ -187,6 +187,7 @@ div#hostlist_header {
         padding:1em;
         border-bottom:6px double gray;
 }
+
 div#hostlist_header p {
         font-style:italic;
         font-size:1.1em;
@@ -197,6 +198,7 @@ div#hostlist_content {
         padding:1em 1em 5em; /* bottom padding for footer */
         border-top:6px double gray;
 }
+
 div#hostlist_content p {
         text-align:justify;
         padding:0 1em;
@@ -213,22 +215,4 @@ div#hostlist_footer {
 div#hostlist_footer p {
         padding:1em;
         margin:0;
-}
-
-.tooltip{
-    position:absolute;
-    z-index:999;
-    left:-9999px;
-    background-color:#dedede;
-    padding:5px;
-    border:1px solid #fff;
-    width:250px;
-}
-
-.tooltip p{
-    margin:0;
-    padding:0;
-    color:#fff;
-    background-color:#222;
-    padding:2px 7px;
 }

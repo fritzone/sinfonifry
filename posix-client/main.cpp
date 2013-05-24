@@ -36,24 +36,26 @@ int main(int argc, char* argv[])
         while(1)
         {
 
-            std::string main_xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-                    "<plugin_data>";
+            std::stringstream ss;
+            ss << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << "<plugin_data>";
 
             for(int i=0; i<plugins.size(); i++)
             {
-                main_xml += "<plugin name=\"";
-                main_xml += plugins[i]->name;
-                main_xml += "\">";
-
-                std::string encoded_plugin_result = PluginHelper::instance().executeClientPlugin(plugins[i]);
-
-                main_xml += encoded_plugin_result;
-                main_xml += "</plugin>";
+                std::string s = PluginHelper::instance().executeClientPlugin(plugins[i]);
+                if(s.empty())
+                {
+                    continue;
+                }
+                ss << "<plugin name=\"";
+                ss << plugins[i]->name;
+                ss << "\">";
+                ss << s;
+                ss << "</plugin>";
 
             }
-            main_xml += "</plugin_data>";
+            ss << "</plugin_data>";
 
-            std::string s = main_xml;
+            std::string s = ss.str();
 
             try
             {

@@ -24,7 +24,6 @@ extern "C" {
  * @{
  */
 
-
 /**
  * @brief This function provides internal setup functionality for the plugin.
  *
@@ -50,56 +49,13 @@ extern "C" {
  * The setup method should not free the commands' parameter.
  *
  * @return any value you consider to be useful and which can be handled by the
- *         web gui.
+ *         corresponding web side plugin.
  */
 const char* setup(const char* commands);
-
-/**
- * @brief This is the method which does the real work of the client plugin.
- *
- * It gathers the data this plugin is supposed to send back to the server,
- * formats it in a way that the core components corresponding plugin understands
- * it and returns it.
- *
- * The returned data will be rendered in the response XML unde  the @c
- * <plugin_data> node, inside the plugin element, like:
- * @code
- * <plugin name="plugin_name">
- *  ... HERE GOES THE RETURN VALUE OF THE execute() METHOD ...
- * </plugin>
- * @endcode
- * This method is called at regular intervals while running, this value is
- * specified in the "frequency" setting of the specific plugin. For the values
- * the "frequency" setting can take please refer to the configuration doc.
- *
- * @param [out] free_returned_value How to deal with the data that is
- * returned. The following values are possible:
- *   @li @c DO_NOT_FREE_ME - the caller function does not free the data.
- *   @li @c FREE_ME - free the data with the function @c free() .
- *   @li @c DELETE_ME - free the allocated memory with @c delete [] .
- * For a detailed description of these value see @link ALLOCATION_BEHAVIOR
- * @endlink
- * @param [out] length will contain the length of the returned string. This
- * is especially useful if you return binary data which might contain the
- * '\0' character. If this value is 0 the \c strlen() function is used to
- * determine the length of the returned value.
- *
- *
- * @return The gathered data formatted for the core side component. If this
- *                  returns @c NULL or empty string it is ignored by the caller.
- *
- * @see @c ALLOCATION_BEHAVIOR for a detailed description of the values
- */
-
-char* execute(ALLOCATION_BEHAVIOR* free_returned_value, unsigned int* length);
 
 /*****************************************************************************
  *      Typedefs used for the function pointers of client plugins            *
  *****************************************************************************/
-
-/** Function pointer typedef for the @link execute(ALLOCATION_BEHAVIOR*)
- *  @endlink function. */
-typedef char* (*P_CLIENT_EXECUTE)(ALLOCATION_BEHAVIOR*, unsigned int*);
 
 /** Function pointer typedef for the @link setup(const char*) @endlink
  *  function */

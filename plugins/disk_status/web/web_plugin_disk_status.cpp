@@ -38,7 +38,12 @@ const char* descriptive_name()
     return "Disk Status";
 }
 
-char* data_request(ALLOCATION_BEHAVIOR *free_returned_value, const char *ip, const char *div_name)
+void release(char* intermediary)
+{
+    delete intermediary;
+}
+
+char* data_request(const char *ip, const char *div_name)
 {
     // the host ID
     uint32_t host_id = 0;
@@ -152,7 +157,6 @@ char* data_request(ALLOCATION_BEHAVIOR *free_returned_value, const char *ip, con
     char *s = new char [reply.str().length() + 1] ;
     strcpy(s, reply.str().c_str());
     s[reply.str().length()] = 0;
-    *free_returned_value = DELETE_ME;
     return s;
 }
 

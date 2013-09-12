@@ -17,7 +17,8 @@
 #include <sinfonifry_plugin_client.h>
 #include <sinfonifry_plugin_base.h>
 #include <sinfonifry_signed_plugin.h>
-
+#include <sinfonifry_signed_plugin_method_load.h>
+#include <sinfonifry_signed_plugin_method_unload.h>
 
 log_define("sinfonifry.client.linux.plugin.disk_status")
 

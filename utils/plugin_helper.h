@@ -9,6 +9,10 @@
 #include "sinfonifry_plugin_vis.h"
 #include "sinfonifry_plugin_base.h"
 #include "sinfonifry_signed_plugin.h"
+#include "sinfonifry_signed_plugin_method_load.h"
+#include "sinfonifry_signed_plugin_method_unload.h"
+#include "sinfonifry_signed_plugin_client_method_execute.h"
+#include "sinfonifry_signed_plugin_client_method_release.h"
 #include "components.h"
 
 class Configuration;

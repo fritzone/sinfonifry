@@ -1,0 +1,29 @@
+******************
+What is Sinfonifry
+******************
+
+Sinfonifry is a monitoring application which was written with the purpose of 
+observing hosts over a network via a unified web interface. From day zero the
+system was designed to be extensible with plugins, so you can pretty much
+implement any feature you consider important for your system.
+
+The system was written with the purpose of providing a way to monitor the status
+of hosts running over a network, by reporting disk usage and other statistics to
+a central server, this data on its turn is accessible via a web based GUI.
+
+Sinfonifry comes with support for the Linux OS.
+
+*****************
+System components
+*****************
+
+Sinfonifry contains the following components:
+
+ * client
+ * core
+ * web
+
+ The Sinfonifry Client
+ =====================
+ 
+ The client application is installed on 

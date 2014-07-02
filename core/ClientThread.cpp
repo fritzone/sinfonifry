@@ -4,7 +4,7 @@
 #include <db_utils.h>
 #include "tntdb.h"
 #include "tinyxml/tinyxml.h"
-#include <cxxtools/loginit.h>
+#include <cxxtools/log/cxxtools.h>
 
 log_define("sinfonifry.core.client_thread")
 

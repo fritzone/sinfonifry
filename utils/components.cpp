@@ -1,5 +1,5 @@
 #include "components.h"
-#include <cxxtools/loginit.h>
+#include <cxxtools/log/cxxtools.h>
 
 log_define("sinfonifry.components");
 

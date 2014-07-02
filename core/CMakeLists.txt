@@ -47,7 +47,7 @@ configure_file("${SINFONIFRY_ROOT}/templates/instdir.h.template" ${CMAKE_CURRENT
 
 add_executable(${PROJECT} ${${PROJECT}_SOURCES})
 
-target_link_libraries(${PROJECT} cxxtools tntdb)
+target_link_libraries(${PROJECT} cxxtools tntdb dl)
 
 install(TARGETS ${PROJECT} DESTINATION sinfonifry/core)
 install(FILES log.properties DESTINATION sinfonifry/core)

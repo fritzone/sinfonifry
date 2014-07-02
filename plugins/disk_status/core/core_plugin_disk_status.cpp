@@ -2,7 +2,7 @@
 #include "tntdb.h"
 #include "configuration.h"
 #include "db_utils.h"
-#include <cxxtools/loginit.h>
+#include <cxxtools/log/cxxtools.h>
 
 #include <sinfonifry_plugin_core.h>
 #include <sinfonifry_plugin_base.h>

@@ -1,5 +1,8 @@
 <%pre>
 #include <tntdb.h>
+#include <configuration.h>
+#include "db_utils.h"
+
 bool is_dot(char c)
 {
   return c == '.';
@@ -16,7 +19,9 @@ bool is_dot(char c)
       <div id="hostlist_content">
         <table cellspacing="0">
           <%cpp>
-            tntdb::Connection conn = tntdb::connect("postgresql:dbname=sinfonifry user=sinfonifry password=s1nf0n1fry");
+            log_info("AAAAAAAAAAAAAAAAA");
+            Configuration conf = Configuration::defaultConfiguration();
+            tntdb::Connection conn = tntdb::connect(sinfonifry::get_master_connection_string(conf));
             std::string query_for_hosts = "select host_name, host_ip, A.host_id, to_char(host_last_seen_time,'YYYY/MM/DD HH24:MI:SS'), host_last_status, host_last_status_text "
                     "from  sinf01_host A , sinf01_host_status B where A.host_id = B.host_id order by host_name";
             tntdb::Result result = conn.select(query_for_hosts);

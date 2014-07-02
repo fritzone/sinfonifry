@@ -27,3 +27,10 @@ Sinfonifry contains the following components:
  =====================
  
  The client application is installed on 
+ 
+ TODO: 
+ 
+ 1. Copy img to web component directory
+ 2. copy JS files to web component directory
+ 3. tntnet.conf and log.properties too
+ 4. style.css

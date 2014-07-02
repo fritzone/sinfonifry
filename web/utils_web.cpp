@@ -1,6 +1,6 @@
 #include "utils_web.h"
 #include "tinyxml/tinyxml.h"
-#include <cxxtools/loginit.h>
+#include <cxxtools/log/cxxtools.h>
 
 log_define("sinfonifry.web.utils")
 

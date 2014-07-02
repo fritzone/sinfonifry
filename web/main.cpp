@@ -1,6 +1,6 @@
 #include <tnt/tntnet.h>
 
-#include <cxxtools/loginit.h>
+#include <cxxtools/log/cxxtools.h>
 
 #include <plugin_helper.h>
 #include <configuration.h>
@@ -13,7 +13,7 @@ int main(int argc, char* argv[])
 {
   try
   {
-
+        
         log_init("log.properties");
 
         // load the configuration
@@ -37,6 +37,8 @@ int main(int argc, char* argv[])
         app.mapUrl("/(.*).png", "images");
         app.mapUrl("/(.*).js", "jscript");
         app.mapUrl("/(.*).css", "css");
+        
+        log_info("App starting");
 
         app.run();
     }

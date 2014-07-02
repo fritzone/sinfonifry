@@ -5,6 +5,11 @@
 #include "db_utils.h"
 #include <algorithm>
 
+#include <cxxtools/log/cxxtools.h>
+
+log_define("sinfonifry.plugins.web.disk-status")
+
+
 // an internal about string. User should NOT free the data returned from here
 const char* about()
 {
@@ -45,6 +50,8 @@ void release(char* intermediary)
 
 char* data_request(const char *ip, const char *div_name)
 {
+    log_info("Enter");
+    
     // the host ID
     uint32_t host_id = 0;
     Configuration conf = Configuration::defaultConfiguration();

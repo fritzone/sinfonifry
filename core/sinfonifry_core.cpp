@@ -2,7 +2,7 @@
 #include "ClientThread.h"
 #include "plugin_helper.h"
 
-#include <cxxtools/loginit.h>
+#include <cxxtools/log/cxxtools.h>
 #include <cxxtools/net/tcpserver.h>
 
 #include <exception>

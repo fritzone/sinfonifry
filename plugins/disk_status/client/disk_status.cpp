@@ -19,6 +19,8 @@
 #include <sinfonifry_signed_plugin.h>
 #include <sinfonifry_signed_plugin_method_load.h>
 #include <sinfonifry_signed_plugin_method_unload.h>
+#include <sinfonifry_signed_plugin_client_method_execute.h>
+#include <sinfonifry_signed_plugin_client_method_release.h>
 
 log_define("sinfonifry.client.linux.plugin.disk_status")
 
@@ -37,6 +39,9 @@ static void pretty_print_line(const char *device, const char *fs_type,
      << "\" mountpt = \"" << mtpt
      << "\" total_bytes = \"" << total
      << "\" free_bytes = \"" << free_space << "\" />";
+     
+     log_info(std::string(device) + std::string(" -> ") + 
+              std::string(fs_type) + " " + mtpt);
 }
 
 static void pretty_print_dev(blkid_dev dev, std::stringstream& ss)
@@ -71,8 +76,7 @@ static void pretty_print_dev(blkid_dev dev, std::stringstream& ss)
 
   /* Get the mount point */
   mtpt[0] = 0;
-  retval = ext2fs_check_mount_point(devname, &mount_flags,
-				    mtpt, sizeof(mtpt));
+  retval = ext2fs_check_mount_point(devname, &mount_flags, mtpt, sizeof(mtpt));
   if (retval == 0) {
     if (mount_flags & EXT2_MF_MOUNTED) {
       if (!mtpt[0])
@@ -110,7 +114,9 @@ std::string gather_disk_stat()
     {
       dev = blkid_verify(cache, dev);
       if (!dev)
-        continue;
+      {
+          continue;
+      }
       pretty_print_dev(dev, ss);
     }
     blkid_dev_iterate_end(iter);
@@ -139,7 +145,7 @@ void release(char* intermediary)
 // called upon loading the plugin. Internal initialization can be done
 PLUGIN_LOAD_STATUS load()
 {
-	return PLUGIN_LOADED;
+    return PLUGIN_LOADED;
 }
 
 // called when the system goes down.

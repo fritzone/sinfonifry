@@ -12,6 +12,8 @@ using namespace sinfonifry;
 
 bool ClientThread::hostIsAllowed(const std::string& c)
 {
+    tntdb::Connection conn;
+
     try
     {
         tntdb::Connection conn = tntdb::connect(sinfonifry::get_master_connection_string(m_conf));
@@ -26,6 +28,7 @@ bool ClientThread::hostIsAllowed(const std::string& c)
             // this host is not enabled
             log_error("Host is not allowed to connect: " << c);
             m_worker->close();
+            conn.close();
             return false;
         }
 
@@ -35,6 +38,7 @@ bool ClientThread::hostIsAllowed(const std::string& c)
     {
             log_error("Cannot check if the host is allowed to connect or not: " << e.what());
             m_worker->close();
+            conn.close();
             return false;
     }
 
@@ -43,10 +47,12 @@ bool ClientThread::hostIsAllowed(const std::string& c)
 
 bool ClientThread::hostNeedsInit(const std::string &ip)
 {
+    tntdb::Connection conn;
+
     bool to_ret = true;
     try
     {
-        tntdb::Connection conn = tntdb::connect(sinfonifry::get_master_connection_string(m_conf));
+        conn = tntdb::connect(sinfonifry::get_master_connection_string(m_conf));
         std::string query_for_find_host_in_init_table = "select count(*) from sinf02_host_init where host_init_ip = '" + ip + "'";
         tntdb::Result result = conn.select(query_for_find_host_in_init_table);
 
@@ -65,9 +71,11 @@ bool ClientThread::hostNeedsInit(const std::string &ip)
     {
             log_error("Cannot check if the host needs init or not: " << e.what());
             m_worker->close();
-            throw;
+            conn.close();
+            return false;
     }
 
+    conn.close();
     return to_ret;
 }
 
@@ -147,6 +155,7 @@ void ClientThread::run()
 
       TiXmlDocument doc;
       bool success = doc.FromMemory(s.c_str());
+      log_trace("XML: " + s);
       if(success)
       {
 
@@ -159,7 +168,9 @@ void ClientThread::run()
               TiXmlElement* el_for_plugin_name= el_for_plugin_data->FirstChildElement("plugin");
               if(!el_for_plugin_name)
               {
-                  log_warn("No \"plugin\" node in the plugin_data");
+                  log_warn("No \"plugin\" node in the plugin_data:");
+                  log_warn(s);
+                  conn.close();
                   return;
               }
 
@@ -169,6 +180,7 @@ void ClientThread::run()
                   if(!plugin_name)
                   {
                       log_warn("malformatted XML from client. No plugin name");
+                      conn.close();
                       return;
                   }
 
@@ -195,6 +207,7 @@ void ClientThread::run()
           else
           {
               log_error("No plugin_data node");
+              conn.close();
               return;
           }
 

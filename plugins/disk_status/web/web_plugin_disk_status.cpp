@@ -70,7 +70,7 @@ char* data_request(const char *ip, const char *div_name)
     std::stringstream reply;
 
     std::stringstream ss;
-    ss << "select distinct b.disk_mountpoint, b.disk_id, a.disk_stat_free_space, a.disk_stat_measurement_time, b.disk_total_space, b.disk_physical_id "
+    ss << "select distinct b.disk_mountpoint, b.disk_id, a.disk_stat_free_space, a.disk_stat_measurement_time, b.disk_total_space, b.disk_physical_id, b.disk_fs_type "
        << "from sinf03_disk b, sinf03_disk_statistics a "
        << "where b.host_id = " << host_id << " and a.disk_stat_disk_id =b.disk_id and "
        << "a.disk_stat_measurement_time = (select max(disk_stat_measurement_time) "
@@ -83,19 +83,22 @@ char* data_request(const char *ip, const char *div_name)
     // the header of the table
     reply << "     <tr class=\"d0\">";
       reply << "      <td width=\"300px\">";
-      reply << "<p class=\"table_header\">Mountpoint</p>";
+      reply << "         <p class=\"table_header\">Mountpoint</p>";
       reply << "      </td>";
       reply << "      <td width=\"100px\">";
-      reply << "<p class=\"table_header\">Free</p>";
+      reply << "         <p class=\"table_header\">FS type</p>";
       reply << "      </td>";
       reply << "      <td width=\"100px\">";
-      reply << "<p class=\"table_header\">Total</p>";
+      reply << "         <p class=\"table_header\">Free</p>";
       reply << "      </td>";
       reply << "      <td width=\"100px\">";
-      reply << "<p class=\"table_header\"><b>%Free</b></p>";
+      reply << "         <p class=\"table_header\">Total</p>";
       reply << "      </td>";
       reply << "      <td width=\"100px\">";
-      reply << "<p class=\"table_header\"><b>Status</b></p>";
+      reply << "         <p class=\"table_header\"><b>%Free</b></p>";
+      reply << "      </td>";
+      reply << "      <td width=\"100px\">";
+      reply << "         <p class=\"table_header\"><b>Status</b></p>";
       reply << "      </td>";
       reply << "     </tr>";
     // and here generate the disk data for the current host based on data from the DB
@@ -107,20 +110,26 @@ char* data_request(const char *ip, const char *div_name)
       uint64_t totalSpace;
       uint64_t disk_id;
       std::string physId;
+      std::string fs_type;
+      
       row[0].get(mountpt);
       row[1].get(disk_id);
       row[2].get(freeSpace);
       row[4].get(totalSpace);
       row[5].get(physId);
+      row[6].get(fs_type);
       if(totalSpace > 0) // do not go in there if there is no space on the device (swap for example)
       {
         reply << "     <tr>";
         // the mountpoint
         reply << "      <td>";
         reply << "<p class=\"table_text\" title=\"" << physId << "\">"     ;
-        // TODO: This was a sout() !!!
         reply << "<@ep name=\"disk_details\" params=\"id=" << disk_id << "\" display=\"" << mountpt << "\">";
         reply <<"</p>";
+        reply << "      </td>";
+        // the fs type
+        reply << "      <td>";
+        reply << fs_type;
         reply << "      </td>";
         // the free space
         reply << "      <td>";

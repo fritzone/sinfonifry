@@ -2,7 +2,7 @@
 #include "tntdb.h"
 #include "configuration.h"
 #include "db_utils.h"
-#include <cxxtools/log/cxxtools.h>
+#include <cxxtools/log.h>
 
 #include <sinfonifry_plugin_core.h>
 #include <sinfonifry_plugin_base.h>
@@ -82,7 +82,7 @@ int initialize_host_data(const char* host_ip, const char* data)
                         ss << host_id << ", '" << fs_type << "', '" << disk_mountpoint << "', '" << disk_part_name << "', '" << disk_label << "', " << total_disk_space << ")";
                         std::string query_for_insert_disk = ss.str();
                         conn.execute(query_for_insert_disk);
-
+                        log_debug(query_for_insert_disk);
                         // and now delete the host from the init table
                         std::string query_for_remove_host_from_init_table = std::string("delete from sinf02_host_init where host_init_ip = '") + host_ip + "'";
                         conn.execute(query_for_remove_host_from_init_table);
